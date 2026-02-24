@@ -1,0 +1,24 @@
+=================================================================
+ GEOMORPHOLOGICAL REPORT: STUDY AREA (Tolo Bay & Banda Sea)
+ Coordinate Bounding Box : Lon [121.30 to 123.80], Lat [-3.80 to -1.80]
+ Dataset Resolution      : 15 arc-seconds (~450 meters)
+ Author: Sandy H. S. Herho | Date: 2026/02/22
+=================================================================
+
+[ MARINE BATHYMETRY (OCEAN) ]
+Total Ocean Pixels  : 198,312
+Maximum Depth       : -5422.00 meters
+Average Depth (Mean): -1778.75 meters
+Median Depth        : -1144.50 meters
+
+[ TERRESTRIAL TOPOGRAPHY (LAND) ]
+Total Land Pixels   : 89,688
+Maximum Elevation   : 2315.00 meters
+Average Elevation   : 478.83 meters
+
+[ TARGETED IMPACT ZONE (IMIP) ]
+Longitude: 122.08 to 122.28 | Latitude: -2.92 to -2.72
+Note: This coastline features a rapid transition from steep 
+lateritic hills to a sharp, deep continental shelf, heavily 
+influencing the advection of suspended particulate matter.
+=================================================================

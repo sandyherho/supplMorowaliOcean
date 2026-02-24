@@ -1,0 +1,46 @@
+=========================================================
+ DESCRIPTIVE STATISTICS: CONTROL ZONE
+ Kd490 (x10^-2 m^-1) | Temperature (°C) | Salinity (PSU)
+ Author: Sandy H. S. Herho | Date: 2025/02/22
+=========================================================
+
+--- ENTIRE PERIOD (1997 - Present) ---
+Data Points (Months): 324
+
+               mean    std     min  median     max  skewness  kurtosis
+Kd490        3.7916 0.4959  3.1350  3.6384  6.0483    1.4308    2.1057
+Temperature 29.1126 1.0343 26.3623 29.4963 30.8596   -0.6301   -0.7454
+Salinity    33.5866 0.4998 32.1641 33.5786 34.7523   -0.1778   -0.3578
+
+---------------------------------------------------------
+
+--- PERIOD 1: Pre-Smelter Baseline (Before Apr 2015) ---
+Data Points (Months): 207
+
+               mean    std     min  median     max  skewness  kurtosis
+Kd490        3.7926 0.5340  3.1762  3.6205  6.0483    1.5373    2.2940
+Temperature 29.0062 0.9913 26.3623 29.4335 30.6347   -0.7124   -0.6865
+Salinity    33.5902 0.5185 32.1871 33.6281 34.5875   -0.3304   -0.5664
+
+---------------------------------------------------------
+
+--- PERIOD 2: Initial Operations (Apr 2015 - Dec 2019) ---
+Data Points (Months): 57
+
+               mean    std     min  median     max  skewness  kurtosis
+Kd490        3.8607 0.4805  3.1350  3.7033  4.9440    0.7612   -0.5252
+Temperature 29.0555 1.1506 26.6593 29.4833 30.6186   -0.5864   -1.1172
+Salinity    33.6191 0.4578 32.7466 33.5585 34.4873    0.2102   -0.7374
+
+---------------------------------------------------------
+
+--- PERIOD 3: Post-Export Ban Hyper-Expansion (Jan 2020 - Present) ---
+Data Points (Months): 60
+
+               mean    std     min  median     max  skewness  kurtosis
+Kd490        3.7224 0.3498  3.1752  3.6251  4.8461    0.9639    0.8027
+Temperature 29.5339 0.9727 27.6043 30.0819 30.8596   -0.6000   -1.1189
+Salinity    33.5432 0.4765 32.1641 33.5174 34.7523    0.1916    1.0636
+
+---------------------------------------------------------
+

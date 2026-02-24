@@ -1,0 +1,366 @@
+========================================================================
+  ROBUST STRUCTURAL BREAK DETECTION IN Kd490
+  Impact Zone : Morowali Coastal Waters, Sulawesi
+  Control Zone: Banda Sea (offshore reference)
+========================================================================
+  Author       : Sandy H. S. Herho
+  Generated    : 2026-02-22 20:31:17
+  Random seed  : 42
+  Bootstrap n  : 5000
+  Alpha        : 0.05
+  Scale factor : 100
+========================================================================
+
+  SPATIAL DOMAINS:
+    Impact  -- Lat: -2.92 to -2.72, Lon: 122.08 to 122.28
+    Control -- Lat: -2.75 to -2.45, Lon: 123.0 to 123.4
+
+========================================================================
+  ZONE: MOROWALI COASTAL WATERS (IMPACT)
+========================================================================
+
+1.1 DATA SUMMARY
+------------------------------------------------------------------------
+  Time series length : 324 observations
+  Date range         : 1998-01-01 to 2024-12-01
+  Global mean        : 4.5387
+  Global std         : 0.6871
+  Global min         : 3.5552
+  Global max         : 7.7828
+  Global median      : 4.3652
+
+1.2 PENALTY SENSITIVITY ANALYSIS
+------------------------------------------------------------------------
+  Penalty range      : 1 to 50
+  Optimal penalty    : 3
+  Bkps at optimal    : 3
+  Penalty -> n_bkps:
+    pen=  1 -> 43
+    pen=  2 -> 11
+    pen=  3 ->  3
+    pen=  4 ->  3
+    pen=  5 ->  2
+    pen=  6 ->  2
+    pen=  7 ->  2
+    pen=  8 ->  1
+    pen=  9 ->  1
+    pen= 10 ->  1
+    pen= 11 ->  1
+    pen= 12 ->  1
+    pen= 13 ->  1
+    pen= 14 ->  1
+    pen= 15 ->  1
+    pen= 16 ->  1
+    pen= 17 ->  1
+    pen= 18 ->  1
+    pen= 19 ->  1
+    pen= 20 ->  1
+    pen= 21 ->  1
+    pen= 22 ->  1
+    pen= 23 ->  1
+    pen= 24 ->  1
+    pen= 25 ->  1
+    pen= 26 ->  1
+    pen= 27 ->  0
+    pen= 28 ->  0
+    pen= 29 ->  0
+    pen= 30 ->  0
+    pen= 31 ->  0
+    pen= 32 ->  0
+    pen= 33 ->  0
+    pen= 34 ->  0
+    pen= 35 ->  0
+    pen= 36 ->  0
+    pen= 37 ->  0
+    pen= 38 ->  0
+    pen= 39 ->  0
+    pen= 40 ->  0
+    pen= 41 ->  0
+    pen= 42 ->  0
+    pen= 43 ->  0
+    pen= 44 ->  0
+    pen= 45 ->  0
+    pen= 46 ->  0
+    pen= 47 ->  0
+    pen= 48 ->  0
+    pen= 49 ->  0
+    pen= 50 ->  0
+
+1.3 BIC MODEL SELECTION
+------------------------------------------------------------------------
+  Optimal k (BIC)    : 3
+  k -> BIC:
+    k= 0 -> BIC =     -232.583
+    k= 1 -> BIC =     -386.594
+    k= 2 -> BIC =     -387.913
+    k= 3 -> BIC =     -390.133 <-- optimal
+    k= 4 -> BIC =     -386.313
+    k= 5 -> BIC =     -385.410
+    k= 6 -> BIC =     -376.770
+    k= 7 -> BIC =     -385.481
+    k= 8 -> BIC =     -359.417
+
+1.4 MULTI-ALGORITHM DETECTION
+------------------------------------------------------------------------
+  PELT    : idx = [256]
+            dates = ['2019-05-01']
+  BinSeg  : idx = [51, 256, 294]
+            dates = ['2002-04-01', '2019-05-01', '2022-07-01']
+  Window  : idx = [29, 257, 269]
+            dates = ['2000-06-01', '2019-06-01', '2020-06-01']
+
+1.5 CONSENSUS BREAKPOINTS (>=2/3 methods, tol=5)
+------------------------------------------------------------------------
+  Index  256 -> 2019-05-01 (May 2019)
+
+1.6 BOOTSTRAP SIGNIFICANCE (n_iter = 5000)
+------------------------------------------------------------------------
+  Break at May 2019 (idx 256):
+    |Delta mu| = 1.065705
+    p-value    = 0.000000 ***
+    -> SIGNIFICANT at alpha = 0.05
+
+1.7 REGIME DESCRIPTIVE STATISTICS
+------------------------------------------------------------------------
+  Rgm       n  n_eff      Mean       Std       Med       IQR       Min       Max    Skew    Kurt      r1
+  ------------------------------------------------------------------------------------------------------
+  1       256     65    4.3150    0.4489    4.2438    0.5265    3.5552    6.0638   0.955   1.081   0.595
+  2        68     39    5.3807    0.7735    5.2739    0.8763    3.9768    7.7828   1.039   1.623   0.275
+
+  Date ranges:
+    Regime 1: 1998-01-01 to 2019-05-01 (256 obs, n_eff=65)
+    Regime 2: 2019-05-01 to 2024-12-01 (68 obs, n_eff=39)
+
+1.8 PAIRWISE REGIME COMPARISONS
+------------------------------------------------------------------------
+  Regime 1 vs 2:
+    Cliff's delta  = -0.8057 (large)
+    Welch t-test   : t = -10.8844, p = 2.079200e-17
+    Mann-Whitney U : U = 1691.0, p = 1.736690e-24
+    Levene's test  : F = 19.4968, p = 1.377470e-05
+    KS 2-sample    : D = 0.6916, p = 1.852329e-25
+
+
+========================================================================
+  ZONE: BANDA SEA (CONTROL)
+========================================================================
+
+2.1 DATA SUMMARY
+------------------------------------------------------------------------
+  Time series length : 324 observations
+  Date range         : 1998-01-01 to 2024-12-01
+  Global mean        : 3.7916
+  Global std         : 0.4959
+  Global min         : 3.1350
+  Global max         : 6.0483
+  Global median      : 3.6384
+
+2.2 PENALTY SENSITIVITY ANALYSIS
+------------------------------------------------------------------------
+  Penalty range      : 1 to 50
+  Optimal penalty    : 3
+  Bkps at optimal    : 0
+  Penalty -> n_bkps:
+    pen=  1 -> 61
+    pen=  2 ->  8
+    pen=  3 ->  0
+    pen=  4 ->  0
+    pen=  5 ->  0
+    pen=  6 ->  0
+    pen=  7 ->  0
+    pen=  8 ->  0
+    pen=  9 ->  0
+    pen= 10 ->  0
+    pen= 11 ->  0
+    pen= 12 ->  0
+    pen= 13 ->  0
+    pen= 14 ->  0
+    pen= 15 ->  0
+    pen= 16 ->  0
+    pen= 17 ->  0
+    pen= 18 ->  0
+    pen= 19 ->  0
+    pen= 20 ->  0
+    pen= 21 ->  0
+    pen= 22 ->  0
+    pen= 23 ->  0
+    pen= 24 ->  0
+    pen= 25 ->  0
+    pen= 26 ->  0
+    pen= 27 ->  0
+    pen= 28 ->  0
+    pen= 29 ->  0
+    pen= 30 ->  0
+    pen= 31 ->  0
+    pen= 32 ->  0
+    pen= 33 ->  0
+    pen= 34 ->  0
+    pen= 35 ->  0
+    pen= 36 ->  0
+    pen= 37 ->  0
+    pen= 38 ->  0
+    pen= 39 ->  0
+    pen= 40 ->  0
+    pen= 41 ->  0
+    pen= 42 ->  0
+    pen= 43 ->  0
+    pen= 44 ->  0
+    pen= 45 ->  0
+    pen= 46 ->  0
+    pen= 47 ->  0
+    pen= 48 ->  0
+    pen= 49 ->  0
+    pen= 50 ->  0
+
+2.3 BIC MODEL SELECTION
+------------------------------------------------------------------------
+  Optimal k (BIC)    : 0
+  k -> BIC:
+    k= 0 -> BIC =     -443.875 <-- optimal
+    k= 1 -> BIC =     -434.705
+    k= 2 -> BIC =     -434.535
+    k= 3 -> BIC =     -425.442
+    k= 4 -> BIC =     -417.986
+    k= 5 -> BIC =     -407.718
+    k= 6 -> BIC =     -428.666
+    k= 7 -> BIC =     -392.551
+    k= 8 -> BIC =     -388.454
+
+2.4 MULTI-ALGORITHM DETECTION
+------------------------------------------------------------------------
+  PELT    : idx = []
+            dates = []
+  BinSeg  : idx = [14]
+            dates = ['1999-03-01']
+  Window  : idx = [137]
+            dates = ['2009-06-01']
+
+2.5 CONSENSUS BREAKPOINTS (>=2/3 methods, tol=5)
+------------------------------------------------------------------------
+  No consensus breakpoints detected.
+
+2.6 BOOTSTRAP SIGNIFICANCE (n_iter = 5000)
+------------------------------------------------------------------------
+  No breakpoints to test.
+2.7 REGIME DESCRIPTIVE STATISTICS
+------------------------------------------------------------------------
+  Rgm       n  n_eff      Mean       Std       Med       IQR       Min       Max    Skew    Kurt      r1
+  ------------------------------------------------------------------------------------------------------
+  1       324     50    3.7916    0.4959    3.6384    0.5180    3.1350    6.0483   1.424   2.055   0.734
+
+  Date ranges:
+    Regime 1: 1998-01-01 to 2024-12-01 (324 obs, n_eff=50)
+
+2.8 PAIRWISE REGIME COMPARISONS
+------------------------------------------------------------------------
+  Single regime -- no pairwise comparisons.
+
+========================================================================
+  CROSS-ZONE COMPARISON: IMPACT vs CONTROL
+========================================================================
+
+3.1 FULL TIME SERIES COMPARISON
+------------------------------------------------------------------------
+  Impact  : mu = 4.5387, sigma = 0.6871, n = 324
+  Control : mu = 3.7916, sigma = 0.4959, n = 324
+  Welch t-test   : t = 15.8693, p = 1.839142e-47
+  Mann-Whitney U : U = 88900.0, p = 1.018034e-52
+  Cliff's delta  = +0.6937 (large)
+  KS 2-sample    : D = 0.5895, p = 1.492114e-52
+
+3.2 PRE/POST BREAK COMPARISON (at impact breakpoints)
+------------------------------------------------------------------------
+
+  Breakpoint: May 2019 (impact index 256)
+
+  IMPACT -- pre vs post:
+    Pre  : mu = 4.3150, sigma = 0.4489, n = 256
+    Post : mu = 5.3807, sigma = 0.7735, n = 68
+    Delta mu      = +1.0657
+    Cliff's delta = -0.8057 (large)
+    Welch t-test  : t = -10.8844, p = 2.079200e-17
+
+  CONTROL -- pre vs post (same date split):
+    Pre  : mu = 3.7959, sigma = 0.5196, n = 256
+    Post : mu = 3.7753, sigma = 0.3971, n = 68
+    Delta mu      = -0.0206
+    Cliff's delta = -0.0415 (negligible)
+    Welch t-test  : t = 0.3553, p = 7.229029e-01
+
+  DIFFERENCE-IN-DIFFERENCES (DiD):
+    DiD = (Delta mu_impact) - (Delta mu_control)
+        = (+1.0657) - (-0.0206)
+        = +1.0863
+
+    A positive DiD indicates the impact zone
+    experienced a larger turbidity increase than
+    the control zone, beyond any shared regional
+    trend. This strengthens the attribution to
+    local forcing factors.
+
+
+========================================================================
+  INTERPRETATION
+========================================================================
+
+  KEY FINDINGS:
+
+  1. LOCALIZED PERTURBATION DETECTED
+     The impact zone (Morowali coastal waters) exhibits
+     a robust structural break in Kd490, while the
+     control zone (Banda Sea) shows NO significant
+     break. This asymmetry is consistent with a
+     localized perturbation (e.g., land-use change,
+     coastal development, intensified mining activity)
+     rather than a basin-wide oceanographic shift.
+
+  2. BREAK CHARACTERIZATION
+     The break at May 2019 divides
+     the impact zone record into two regimes:
+
+     Regime 1 (1998-01 to 2019-05):
+       mu = 4.3150, sigma = 0.4489
+       n = 256, n_eff = 65
+       lag-1 autocorr = 0.595
+
+     Regime 2 (2019-05 to 2024-12):
+       mu = 5.3807, sigma = 0.7735
+       n = 68, n_eff = 39
+       lag-1 autocorr = 0.275
+
+     Statistical confirmation:
+       Cliff's delta = -0.8057 (large)
+       Welch t p     = 2.08e-17
+       MW U p        = 1.74e-24
+       KS D          = 0.6916, p = 1.85e-25
+       Levene F p    = 1.38e-05
+       All tests reject H0 at alpha = 0.05.
+
+  3. CONTROL ZONE BASELINE
+     The control zone provides a baseline for evaluating
+     whether Kd490 changes in the impact zone are
+     attributable to local forcing vs large-scale climate
+     variability (ENSO, IOD, monsoon shifts).
+     The ABSENCE of a break in the control zone
+     strengthens the attribution to local drivers.
+
+  METHODOLOGICAL NOTES:
+
+  - Multi-algorithm consensus (PELT + BinSeg + Window)
+    ensures robustness against algorithm-specific biases.
+  - Bootstrap permutation tests (n=5000) provide
+    distribution-free significance without normality
+    assumptions.
+  - Cliff's delta is preferred over Cohen's d because it
+    makes no normality assumption and is robust to outliers
+    (Romano et al., 2006).
+  - Effective sample sizes (Bretherton et al., 1999)
+    correct for temporal autocorrelation in significance
+    interpretation.
+  - BIC model selection guards against over-segmentation.
+  - The Difference-in-Differences (DiD) framework isolates
+    local-scale impacts from shared regional trends.
+
+========================================================================
+  END OF REPORT
+========================================================================

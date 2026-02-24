@@ -1,0 +1,148 @@
+=================================================================
+ COMPREHENSIVE ROBUST STATISTICAL REPORT: Kd490 ATTENUATION
+ Optical values scaled by 10^-2 m^-1
+ Author: Sandy H. S. Herho | Date: 2026/02/22
+=================================================================
+
+[ SECTION 1: SPATIAL DOMAIN GRID CELL REPORT (4km Resol.) ]
+-----------------------------------------------------------------
+1. ENTIRE AREA (Tolo Bay & Banda Sea)
+   Coordinates  : Lat [-3.80 to -1.80], Lon [121.30 to 123.80]
+   Grid Shape   : 48 Latitudes x 48 Longitudes
+   Total Cells  : 2,304 pixels
+   Valid Cells  : 1,467 pixels (NaN removed: 837)
+   Physical Area: ~23,472 km^2 (valid cells only)
+
+2. IMPACT ZONE (IMIP Coastline & Drift)
+   Coordinates  : Lat [-2.92 to -2.72], Lon [122.08 to 122.28]
+   Grid Shape   : 5 Latitudes x 5 Longitudes
+   Total Cells  : 25 pixels
+   Valid Cells  : 16 pixels (NaN removed: 9)
+   Physical Area: ~256 km^2 (valid cells only)
+
+3. CONTROL ZONE (Banda Sea Baseline)
+   Coordinates  : Lat [-2.75 to -2.45], Lon [123.00 to 123.40]
+   Grid Shape   : 7 Latitudes x 7 Longitudes
+   Total Cells  : 49 pixels
+   Valid Cells  : 49 pixels (NaN removed: 0)
+   Physical Area: ~784 km^2 (valid cells only)
+
+[ SECTION 2: ROBUST NON-PARAMETRIC DESCRIPTIVE STATISTICS ]
+-----------------------------------------------------------------
+--- ENTIRE PERIOD (1997 - Present) (n=324 months) ---
+  > Impact_Zone:
+      Median (Central Tendency) : 4.3652
+      MAD (Robust Dispersion)   : 0.3671
+      Min / Max                 : 3.5552 / 7.7828
+      Skewness (Asymmetry)      : 1.5219
+      Kurtosis (Tail Extremes)  : 3.4829
+  > Control_Zone:
+      Median (Central Tendency) : 3.6384
+      MAD (Robust Dispersion)   : 0.2316
+      Min / Max                 : 3.1350 / 6.0483
+      Skewness (Asymmetry)      : 1.4308
+      Kurtosis (Tail Extremes)  : 2.1057
+
+--- PRE-SMELTER BASELINE (Before Apr 2015) (n=207 months) ---
+  > Impact_Zone:
+      Median (Central Tendency) : 4.1865
+      MAD (Robust Dispersion)   : 0.2430
+      Min / Max                 : 3.5552 / 6.0638
+      Skewness (Asymmetry)      : 1.0383
+      Kurtosis (Tail Extremes)  : 1.4857
+  > Control_Zone:
+      Median (Central Tendency) : 3.6205
+      MAD (Robust Dispersion)   : 0.2448
+      Min / Max                 : 3.1762 / 6.0483
+      Skewness (Asymmetry)      : 1.5373
+      Kurtosis (Tail Extremes)  : 2.2940
+
+--- INITIAL OPERATIONS (Apr 2015 - Dec 2019) (n=57 months) ---
+  > Impact_Zone:
+      Median (Central Tendency) : 4.5065
+      MAD (Robust Dispersion)   : 0.2735
+      Min / Max                 : 3.8882 / 7.7828
+      Skewness (Asymmetry)      : 2.5517
+      Kurtosis (Tail Extremes)  : 10.6846
+  > Control_Zone:
+      Median (Central Tendency) : 3.7033
+      MAD (Robust Dispersion)   : 0.2351
+      Min / Max                 : 3.1350 / 4.9440
+      Skewness (Asymmetry)      : 0.7612
+      Kurtosis (Tail Extremes)  : -0.5252
+
+--- POST-BAN HYPER-EXPANSION (Jan 2020 - Present) (n=60 months) ---
+  > Impact_Zone:
+      Median (Central Tendency) : 5.3080
+      MAD (Robust Dispersion)   : 0.4394
+      Min / Max                 : 3.9768 / 7.6954
+      Skewness (Asymmetry)      : 0.8011
+      Kurtosis (Tail Extremes)  : 1.4315
+  > Control_Zone:
+      Median (Central Tendency) : 3.6251
+      MAD (Robust Dispersion)   : 0.2302
+      Min / Max                 : 3.1752 / 4.8461
+      Skewness (Asymmetry)      : 0.9639
+      Kurtosis (Tail Extremes)  : 0.8027
+
+[ SECTION 3: TIME-SERIES TREND ESTIMATION (Theil-Sen & Kendall) ]
+-----------------------------------------------------------------
+Methodology: Theil-Sen estimator derives median slope magnitude, immune to 
+up to 29% outliers. Kendall's Tau evaluates monotonic significance.
+
+--- ENTIRE PERIOD (1997 - Present) ---
+  > Impact_Zone:
+      Sen's Slope (Mag/Month):  0.00384
+      Kendall's Tau          :  0.43412
+      P-Value                : 2.07991e-31 [Highly Significant (p < 0.01)]
+  > Control_Zone:
+      Sen's Slope (Mag/Month):  0.00007
+      Kendall's Tau          :  0.01258
+      P-Value                : 7.35589e-01 [Not Significant]
+
+--- PRE-SMELTER BASELINE (Before Apr 2015) ---
+  > Impact_Zone:
+      Sen's Slope (Mag/Month):  0.00171
+      Kendall's Tau          :  0.17884
+      P-Value                : 1.29627e-04 [Highly Significant (p < 0.01)]
+  > Control_Zone:
+      Sen's Slope (Mag/Month): -0.00021
+      Kendall's Tau          : -0.02312
+      P-Value                : 6.20719e-01 [Not Significant]
+
+--- INITIAL OPERATIONS (Apr 2015 - Dec 2019) ---
+  > Impact_Zone:
+      Sen's Slope (Mag/Month):  0.00719
+      Kendall's Tau          :  0.16667
+      P-Value                : 6.70850e-02 [Not Significant]
+  > Control_Zone:
+      Sen's Slope (Mag/Month):  0.00141
+      Kendall's Tau          :  0.03885
+      P-Value                : 6.69526e-01 [Not Significant]
+
+--- POST-BAN HYPER-EXPANSION (Jan 2020 - Present) ---
+  > Impact_Zone:
+      Sen's Slope (Mag/Month):  0.01771
+      Kendall's Tau          :  0.31638
+      P-Value                : 3.54753e-04 [Highly Significant (p < 0.01)]
+  > Control_Zone:
+      Sen's Slope (Mag/Month):  0.00094
+      Kendall's Tau          :  0.03390
+      P-Value                : 7.01960e-01 [Not Significant]
+
+[ SECTION 4: SCIENTIFIC INTERPRETATION ]
+-----------------------------------------------------------------
+1. Spatial Context: The Impact Zone contains 16 valid pixels 
+   (out of 25 total, 9 NaN removed), representing 
+   an ocean integration area of ~256 km^2 off IMIP.
+   The Control Zone provides a stable ~784 km^2 pelagic baseline 
+   (49 valid pixels, 0 NaN removed).
+
+2. Decadal Trend: Over the entire studied epoch, the Impact Zone exhibits a 
+   highly significant (p < 0.01) upward monotonic trend (τ = 0.434), 
+   indicating persistent, long-term ecosystem alteration.
+
+3. Policy Impact (Descriptive): The median Kd490 attenuation in the Impact Zone 
+   shifted from a natural baseline of 4.19 to 5.31 during the Post-Ban 
+   Hyper-Expansion era. This represents a descriptive increase of 26.8% 
+   in central tendency, coinciding with accelerated industrial processing activity.
