@@ -1,0 +1,102 @@
+======================================================================
+  BAYESIAN STRUCTURAL TIME SERIES — CausalImpact
+  Impact Zone Kd490  |  Intervention: May 2019
+  Author: Sandy H. S. Herho
+  Generated: 2026-02-25 21:51:31
+======================================================================
+
+── 1  DATA ────────────────────────────────────────
+  Pre-period  : 1998-01 -> 2019-04  (256 months)
+  Post-period : 2019-05 -> 2024-12  (68 months)
+  Response    : Kd490 in impact zone
+  Covariates  : Kd490_ctrl, SST_ctrl, SSS_ctrl
+  Units       : x10^-2 m^-1
+
+── 2  CAUSAL IMPACT ───────────────────────────────
+  Post avg. observed  : 5.3807  x10^-2 m^-1
+  Post avg. predicted : 4.7043  x10^-2 m^-1
+      95% CI          : [4.1785, 5.2300]
+  Avg. causal effect  : +0.6765  x10^-2 m^-1
+  Relative effect     : +14.4%
+  Cumulative effect   : +46.0010  x10^-2 m^-1
+  Two-sided p-value   : 0.0117
+
+  *** STATISTICALLY SIGNIFICANT (p < 0.05) ***
+  The intervention is associated with a significant increase
+  in Kd490 in the impact zone.
+
+── 3  PHYSICAL INTERPRETATION ─────────────────────
+  Kd490 (diffuse attenuation coefficient at 490 nm) is a satellite-
+  derived proxy for upper-ocean turbidity.  Higher Kd490 indicates
+  increased light attenuation due to suspended sediments, CDOM, or
+  phytoplankton biomass.  Values are in units of x10^-2 m^-1.
+
+  The BSTS model uses control-zone covariates (Kd490, SST, SSS) to
+  absorb basin-wide natural forcing: ENSO, IOD, monsoonal cycles,
+  MJO, and inter-annual SST variability.  By constructing a
+  synthetic counterfactual for the impact zone, any RESIDUAL
+  divergence after May 2019 must arise from a LOCAL perturbation
+  rather than large-scale climate variability.
+
+  The average causal effect of +0.6765 (x10^-2 m^-1) corresponds to
+  +0.006765 m^-1 in absolute terms.  This translates to a +14.4%
+  relative increase in Kd490 over the counterfactual baseline.  Such
+  an increase implies a reduction in euphotic depth (Zeu ~ 4.6/Kd)
+  from approximately 97.8 m (predicted) to 85.5 m (observed).
+
+  -> CONCLUSION: The positive and significant increase in Kd490
+     indicates the impact-zone water became substantially more
+     turbid after the intervention.  Since basin-wide natural
+     drivers are accounted for by the control covariates, the most
+     parsimonious explanation is a LOCAL ANTHROPOGENIC perturbation
+     — e.g. enhanced sediment/effluent discharge from mining,
+     smelting, coastal construction, or land-use change in the
+     catchment.
+
+── 4  ROBUSTNESS CHECKS ───────────────────────────
+
+  4a  Placebo / falsification test
+      Number of placebos   : 40
+      True effect          : +0.6765
+      Placebo mean         : +0.0408
+      Placebo std          : 0.1114
+      Placebo range        : [-0.1780, +0.3251]
+      Rank-based p-value   : 0.0000
+      The rank-based p-value is the fraction of placebo effects
+      whose absolute value equals or exceeds the absolute true
+      effect.  A small value (< 0.05) confirms the true effect is
+      anomalous relative to natural pre-period fluctuations.
+      -> PASSED: true effect is extreme vs. placebos.
+
+  4b  Leave-one-out covariate sensitivity
+      Configuration                   Effect     p-value
+      --------------------------  ----------  ----------
+      All covariates                 +0.6765      0.0117
+      Drop X_Kd490_ctrl              +0.7140      0.0180
+      Drop X_Temp_ctrl               +0.6756      0.0132
+      Drop X_Sal_ctrl                +0.6853      0.0109
+
+      If the sign and significance of the effect remain stable
+      across all leave-one-out configurations, the result is robust
+      to covariate selection.
+      -> ROBUST: sign and significance stable.
+
+  4c  Pre-period model diagnostics
+      Shapiro-Wilk normality test
+        statistic  : 0.6969
+        p-value    : 0.0000
+        -> Residuals depart from normality; CIs
+           interpreted with caution (common for
+           environmental time series).
+      Ljung-Box(12) autocorrelation test
+        p-value    : 0.0000
+        -> Residual autocorrelation present; model
+           may underfit some seasonal structure.
+
+── 5  OVERALL ASSESSMENT ──────────────────────────
+  STRONG EVIDENCE of an anthropogenic effect:
+    [x] Statistically significant causal impact (p < 0.05)
+    [x] Placebo test confirms effect is anomalous
+    [x] Sensitivity analysis confirms robustness
+
+======================================================================

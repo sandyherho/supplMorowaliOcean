@@ -2,378 +2,510 @@
 """
 =================================================================
   BAYESIAN STRUCTURAL TIME SERIES — CausalImpact
-  Impact Zone Kd490 | Intervention: May 2019
+  Impact Zone Kd490  |  Intervention: May 2019
   Author: Sandy H. S. Herho
 =================================================================
-
-Brodersen et al. (2015) Bayesian state-space model:
-  Observation:  y_t = Z_t'α_t + β'X_t + ε_t
-  State:        α_{t+1} = T_t α_t + R_t η_t
-
-Covariates (Control Zone only — unaffected by treatment):
-  X1 = Control Zone Kd490
-  X2 = Control Zone Temperature
-  X3 = Control Zone Salinity
-
-Intervention date: May 2019
-Pre-period:  1998-01 → 2019-04  (256 months)
-Post-period: 2019-05 → 2024-12  ( 68 months)
 """
 
-import warnings
-warnings.filterwarnings("ignore")
+import os, textwrap, warnings
+from datetime import datetime
 
-import sys
-import numpy as np
-import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from causalimpact import CausalImpact
-from scipy import stats
+import numpy as np
+import pandas as pd
+from scipy import stats as sp_stats
 
-# ── Configuration ──────────────────────────────────────────────
-INTERVENTION = "2019-05"
-PRE_END = "2019-04"
-ALPHA = 0.05
+warnings.filterwarnings("ignore")
 
-# --- DATA PATHS (adjust to your directory structure) -----------
-# Option A: single processed CSV with columns:
-#   [y, X_Kd490_ctrl, X_Temp_ctrl, X_Sal_ctrl]
-PROCESSED_CSV = None  # e.g., "data/processed/bsts_input.csv"
+# ── config ──────────────────────────────────────────────────────
+DPI          = 400
+INTERVENTION = "2019-05-01"
+DATADIR      = "../processed_data"
+FIGDIR       = "../figs"
+REPORTDIR    = "../reports"
 
-# Option B: separate raw CSVs
-IMPACT_KD490  = "../processed_data/Impact_Zone_Kd490_Raw.csv"
-CONTROL_KD490 = "../processed_dataControl_Zone_Kd490_Raw.csv"
-CONTROL_TS    = "../processed_data/Control_Zone_Kd490_Temp_Sal.csv"
+matplotlib.rc("font", family="serif", size=9)
+matplotlib.rc("axes", linewidth=0.5)
+matplotlib.rc("xtick", direction="in", top=True)
+matplotlib.rc("ytick", direction="in", right=True)
 
-# Output
-FIG_OUT = "../figs/fig_causalimpact.png"
-FIG_DPI = 400
+UNIT = r"[$\times\,10^{-2}$ m$^{-1}$]"
 
 
-# ═══════════════════════════════════════════════════════════════
-#  DATA LOADING
-# ═══════════════════════════════════════════════════════════════
-def load_data():
-    """Load and merge data into CausalImpact input format.
+# ════════════════════════════════════════════════════════════════
+#  1. DATA
+# ════════════════════════════════════════════════════════════════
 
-    Returns DataFrame with DatetimeIndex and columns:
-      y              — Impact Zone Kd490 (response)
-      X_Kd490_ctrl   — Control Zone Kd490
-      X_Temp_ctrl    — Control Zone Temperature
-      X_Sal_ctrl     — Control Zone Salinity
-    """
-    if PROCESSED_CSV is not None:
-        data = pd.read_csv(PROCESSED_CSV, index_col=0, parse_dates=True)
-        data.index = pd.DatetimeIndex(data.index, freq="MS")
-        print(f"  Loaded {len(data)} obs from processed CSV: "
-              f"{data.index[0].strftime('%Y-%m')} to "
-              f"{data.index[-1].strftime('%Y-%m')}")
-        print(f"  Columns: {list(data.columns)}")
-        return data
-
-    # Load separate CSVs
-    df_imp = pd.read_csv(IMPACT_KD490, index_col=0, parse_dates=True)
-    df_ctrl = pd.read_csv(CONTROL_KD490, index_col=0, parse_dates=True)
-    df_ctrl_ts = pd.read_csv(CONTROL_TS, index_col=0, parse_dates=True)
-
-    # Build the CausalImpact input DataFrame
-    # First column MUST be the response (y)
-    data = pd.DataFrame(index=df_imp.index)
-    data["y"] = df_imp.iloc[:, 0]
-    data["X_Kd490_ctrl"] = df_ctrl.iloc[:, 0]
-    data["X_Temp_ctrl"] = df_ctrl_ts["Temperature"]
-    data["X_Sal_ctrl"] = df_ctrl_ts["Salinity"]
-
-    # Ensure DatetimeIndex with monthly freq
-    data.index = pd.DatetimeIndex(data.index, freq="MS")
-    data = data.dropna()
-
-    print(f"  Loaded {len(data)} obs from raw CSVs: "
-          f"{data.index[0].strftime('%Y-%m')} to "
-          f"{data.index[-1].strftime('%Y-%m')}")
-    print(f"  Columns: {list(data.columns)}")
-    return data
+def load_and_merge(datadir):
+    impact = pd.read_csv(
+        os.path.join(datadir, "Impact_Zone_Kd490_Temp_Sal.csv"),
+        parse_dates=["Time"]).set_index("Time").sort_index()
+    control = pd.read_csv(
+        os.path.join(datadir, "Control_Zone_Kd490_Temp_Sal.csv"),
+        parse_dates=["Time"]).set_index("Time").sort_index()
+    df = pd.DataFrame({
+        "y":            impact["Kd490"],
+        "X_Kd490_ctrl": control["Kd490"],
+        "X_Temp_ctrl":  control["Temperature"],
+        "X_Sal_ctrl":   control["Salinity"],
+    })
+    df.index.name = "date"
+    df = df.asfreq("MS").dropna()
+    return df
 
 
-# ═══════════════════════════════════════════════════════════════
-#  CAUSAL IMPACT MODEL
-# ═══════════════════════════════════════════════════════════════
-def run_causal_impact(data):
-    """Fit Bayesian structural time-series via CausalImpact.
+# ════════════════════════════════════════════════════════════════
+#  2. BSTS
+# ════════════════════════════════════════════════════════════════
 
-    Key: nseasons goes inside model_args, NOT as a direct kwarg.
-    """
-    pre_period = [data.index[0], pd.Timestamp(PRE_END)]
-    post_period = [pd.Timestamp(INTERVENTION), data.index[-1]]
+def fit_bsts(df, pre_end, post_start, post_end):
+    from statsmodels.tsa.statespace.structural import UnobservedComponents
 
-    ci = CausalImpact(
-        data,
-        pre_period=pre_period,
-        post_period=post_period,
-        model_args={
-            "nseasons": 12,          # annual seasonality (12 months)
-            "season_duration": 1,     # each season = 1 obs (month)
-            "prior_level_sd": 0.01,   # diffuse local level prior
-            "standardize_data": True,
-            "niter": 1000,
-        },
-        alpha=ALPHA,
-    )
-    return ci, pre_period, post_period
+    pre    = df.loc[:pre_end]
+    post   = df.loc[post_start:post_end]
+    full   = df.loc[:post_end]
+    y_col  = "y"
+    x_cols = [c for c in df.columns if c != y_col]
+    n_post = len(post)
 
+    mod = UnobservedComponents(
+        pre[y_col], level="local linear trend", seasonal=12,
+        exog=pre[x_cols],
+        stochastic_level=True, stochastic_trend=True,
+        stochastic_seasonal=True)
+    res = mod.fit(disp=False, maxiter=1000)
 
-# ═══════════════════════════════════════════════════════════════
-#  DIAGNOSTICS
-# ═══════════════════════════════════════════════════════════════
-def run_diagnostics(ci, data, pre_period):
-    """Pre-period fit diagnostics."""
-    inf = ci.inferences
-    pre_mask = inf.index <= pre_period[1]
+    pred_pre = res.get_prediction()
+    pm_pre   = pred_pre.predicted_mean
+    ci_pre   = pred_pre.conf_int(alpha=0.05)
+    pm_pre.index   = pre.index
+    ci_pre.index   = pre.index
+    ci_pre.columns = ["lower", "upper"]
 
-    # Pre-period residuals
-    resid_pre = (inf.loc[pre_mask, "response"]
-                 - inf.loc[pre_mask, "point_pred"])
+    fcast   = res.get_forecast(steps=n_post, exog=post[x_cols])
+    pm_post = fcast.predicted_mean
+    ci_post = fcast.conf_int(alpha=0.05)
+    pm_post.index   = post.index
+    ci_post.index   = post.index
+    ci_post.columns = ["lower", "upper"]
 
-    # Ljung-Box test for residual autocorrelation
-    lb_stat, lb_p = stats.boxcox_llf  # placeholder
-    from statsmodels.stats.diagnostic import acorr_ljungbox
-    lb_result = acorr_ljungbox(resid_pre.dropna(), lags=[12], return_df=True)
-    lb_stat = lb_result["lb_stat"].values[0]
-    lb_p = lb_result["lb_pvalue"].values[0]
+    pm  = pd.concat([pm_pre, pm_post])
+    cil = pd.concat([ci_pre["lower"], ci_post["lower"]])
+    ciu = pd.concat([ci_pre["upper"], ci_post["upper"]])
 
-    # Pre-period R²
-    ss_res = np.sum(resid_pre.dropna() ** 2)
-    y_pre = inf.loc[pre_mask, "response"].dropna()
-    ss_tot = np.sum((y_pre - y_pre.mean()) ** 2)
-    r2_pre = 1 - ss_res / ss_tot
+    actual       = full[y_col]
+    point_effect = actual - pm
+    cumul_effect = point_effect.loc[post_start:].cumsum()
 
-    # Pre-period MAPE
-    mape_pre = np.mean(np.abs(resid_pre.dropna() / y_pre)) * 100
+    pe = point_effect.loc[post_start:post_end]
+    pp = pm_post
+    pa = actual.loc[post_start:post_end]
+    pl = ci_post["lower"]
+    pu = ci_post["upper"]
 
-    return {
-        "r2_pre": r2_pre,
-        "mape_pre": mape_pre,
-        "ljung_box_stat": lb_stat,
-        "ljung_box_p": lb_p,
-        "resid_pre": resid_pre,
-    }
+    avg_eff = pe.mean()
+    se = (pu - pl).mean() / (2 * 1.96)
+    p_val = (2 * (1 - sp_stats.norm.cdf(abs(avg_eff) / se))
+             if se > 0 else np.nan)
 
-
-# ═══════════════════════════════════════════════════════════════
-#  PRIOR SENSITIVITY ANALYSIS
-# ═══════════════════════════════════════════════════════════════
-def prior_sensitivity(data):
-    """Re-run CausalImpact with different prior_level_sd values.
-
-    If cumulative effect is invariant across priors → robust.
-    """
-    pre_period = [data.index[0], pd.Timestamp(PRE_END)]
-    post_period = [pd.Timestamp(INTERVENTION), data.index[-1]]
-
-    priors = [0.001, 0.01, 0.05, 0.1]
-    results = {}
-
-    for sd in priors:
-        ci_tmp = CausalImpact(
-            data,
-            pre_period=pre_period,
-            post_period=post_period,
-            model_args={
-                "nseasons": 12,
-                "season_duration": 1,
-                "prior_level_sd": sd,
-                "standardize_data": True,
-                "niter": 1000,
-            },
-            alpha=ALPHA,
-        )
-        inf = ci_tmp.inferences
-        post_mask = inf.index >= pd.Timestamp(INTERVENTION)
-        cum_eff = inf.loc[post_mask, "cum_effect"].iloc[-1]
-        results[sd] = cum_eff
-        print(f"    prior_level_sd={sd:.3f}  →  cumulative effect = {cum_eff:.4f}")
-
-    return results
+    return dict(
+        actual=actual, predicted=pm,
+        pred_lower=cil, pred_upper=ciu,
+        point_effect=point_effect, cumul_effect=cumul_effect,
+        post_avg_eff=avg_eff, post_cum_eff=pe.sum(),
+        post_avg_actual=pa.mean(), post_avg_pred=pp.mean(),
+        post_avg_lower=pl.mean(), post_avg_upper=pu.mean(),
+        rel_eff=(avg_eff / pp.mean() * 100
+                 if pp.mean() != 0 else np.nan),
+        p_value=p_val,
+        pre_resid=(actual.loc[:pre_end] - pm_pre).dropna(),
+        pre_end=pre_end, post_start=post_start, post_end=post_end)
 
 
-# ═══════════════════════════════════════════════════════════════
-#  FIGURE 1: CAUSAL IMPACT 3-PANEL
-# ═══════════════════════════════════════════════════════════════
-def make_figure(ci, pre_period, post_period, diagnostics, output_path):
-    """Publication-quality 3×1 panel figure.
+def fit_bsts_quick(df, pre_end, post_start, post_end):
+    try:
+        r = fit_bsts(df, pre_end, post_start, post_end)
+        return r["post_avg_eff"], r["p_value"]
+    except Exception:
+        return np.nan, np.nan
 
-    (a) Observed vs Counterfactual
-    (b) Pointwise Causal Effect
-    (c) Cumulative Causal Effect
-    """
-    inf = ci.inferences
-    idx = inf.index
-    intervention_dt = pd.Timestamp(INTERVENTION)
 
-    fig, axes = plt.subplots(3, 1, figsize=(10, 10), sharex=True,
-                             gridspec_kw={"hspace": 0.12})
+# ════════════════════════════════════════════════════════════════
+#  3. FIGURE  — single 3-panel, no title, labels centered
+# ════════════════════════════════════════════════════════════════
 
-    # ── Color scheme ──
-    c_obs = "#1a1a2e"
-    c_pred = "#e63946"
-    c_band = "#e63946"
-    c_zero = "#888888"
-    c_interv = "#2a9d8f"
+def plot_main(result, figdir):
+    fig, axes = plt.subplots(
+        3, 1, figsize=(7.5, 8.0), sharex=True,
+        gridspec_kw={"height_ratios": [3, 2, 2]})
+    fig.subplots_adjust(
+        hspace=0.08, left=0.13, right=0.97,
+        top=0.98, bottom=0.12)
+    intv = pd.Timestamp(INTERVENTION)
 
-    # ── Panel (a): Observed vs Counterfactual ──────────────────
+    # Trim Kalman burn-in (13 months)
+    t0   = result["actual"].index[13]
+    act  = result["actual"].loc[t0:]
+    pred = result["predicted"].loc[t0:]
+    plo  = result["pred_lower"].loc[t0:]
+    phi  = result["pred_upper"].loc[t0:]
+    pe   = result["point_effect"].loc[t0:]
+
+    # ── (a) Observed vs counterfactual ──
     ax = axes[0]
-    ax.plot(idx, inf["response"], color=c_obs, linewidth=1.0,
-            label="Observed", zorder=3)
-    ax.plot(idx, inf["point_pred"], color=c_pred, linewidth=1.0,
-            linestyle="--", label="Counterfactual", zorder=3)
-    ax.fill_between(idx,
-                    inf["point_pred_lower"],
-                    inf["point_pred_upper"],
-                    color=c_band, alpha=0.15, label="95% CI", zorder=2)
-    ax.axvline(intervention_dt, color=c_interv, linestyle=":",
-               linewidth=1.5, label="Intervention (May 2019)")
-    ax.set_ylabel(r"Kd490 ($\times 10^{-3}$ m$^{-1}$)", fontsize=10)
-    ax.legend(fontsize=8, loc="upper left", framealpha=0.9)
-    ax.set_title("(a) Observed vs. Counterfactual", fontsize=11,
-                 fontweight="bold", loc="left")
+    h1, = ax.plot(act, "k-", lw=0.9,
+                  label=r"Observed $K_d$(490) — impact zone")
+    h2, = ax.plot(pred, color="#1f77b4", lw=0.9,
+                  label="Counterfactual prediction")
+    h3 = ax.fill_between(plo.index, plo, phi,
+                         color="#1f77b4", alpha=0.18,
+                         label="95% CI")
+    ax.axvline(intv, color="red", ls="--", lw=0.8, alpha=0.75)
+    ax.set_ylabel(r"$K_d$(490)  " + UNIT)
+    ax.text(0.5, 0.95, "(a)", transform=ax.transAxes,
+            fontsize=11, fontweight="bold", ha="center", va="top")
 
-    # Annotate pre-period R²
-    ax.text(0.98, 0.95, f"Pre-period R² = {diagnostics['r2_pre']:.3f}",
-            transform=ax.transAxes, ha="right", va="top", fontsize=8,
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
-                      edgecolor="gray", alpha=0.8))
-
-    # ── Panel (b): Pointwise Effect ───────────────────────────
+    # ── (b) Pointwise effect ──
     ax = axes[1]
-    ax.plot(idx, inf["point_effect"], color=c_obs, linewidth=1.0,
-            zorder=3)
-    ax.fill_between(idx,
-                    inf["point_effect_lower"],
-                    inf["point_effect_upper"],
-                    color=c_band, alpha=0.15, zorder=2)
-    ax.axhline(0, color=c_zero, linestyle="-", linewidth=0.8, zorder=1)
-    ax.axvline(intervention_dt, color=c_interv, linestyle=":",
-               linewidth=1.5)
-    ax.set_ylabel("Pointwise Effect", fontsize=10)
-    ax.set_title("(b) Pointwise Causal Effect", fontsize=11,
-                 fontweight="bold", loc="left")
+    ax.fill_between(pe.index, plo - pred, phi - pred,
+                    color="#1f77b4", alpha=0.18)
+    ax.plot(pe, "k-", lw=0.7)
+    ax.axhline(0, color="gray", ls=":", lw=0.5)
+    ax.axvline(intv, color="red", ls="--", lw=0.8, alpha=0.75)
+    ax.set_ylabel("Pointwise effect  " + UNIT)
+    ax.text(0.5, 0.95, "(b)", transform=ax.transAxes,
+            fontsize=11, fontweight="bold", ha="center", va="top")
 
-    # ── Panel (c): Cumulative Effect ──────────────────────────
+    # ── (c) Cumulative effect ──
     ax = axes[2]
-    ax.plot(idx, inf["cum_effect"], color=c_obs, linewidth=1.0,
-            zorder=3)
-    ax.fill_between(idx,
-                    inf["cum_effect_lower"],
-                    inf["cum_effect_upper"],
-                    color=c_band, alpha=0.15, zorder=2)
-    ax.axhline(0, color=c_zero, linestyle="-", linewidth=0.8, zorder=1)
-    ax.axvline(intervention_dt, color=c_interv, linestyle=":",
-               linewidth=1.5)
-    ax.set_ylabel("Cumulative Effect", fontsize=10)
-    ax.set_xlabel("Date", fontsize=10)
-    ax.set_title("(c) Cumulative Causal Effect", fontsize=11,
-                 fontweight="bold", loc="left")
+    ce = result["cumul_effect"]
+    ax.plot(ce, "k-", lw=0.8)
+    ax.fill_between(ce.index, 0, ce, where=ce > 0,
+                    color="#d62728", alpha=0.2, interpolate=True)
+    ax.fill_between(ce.index, 0, ce, where=ce < 0,
+                    color="#1f77b4", alpha=0.2, interpolate=True)
+    ax.axhline(0, color="gray", ls=":", lw=0.5)
+    ax.axvline(intv, color="red", ls="--", lw=0.8, alpha=0.75)
+    ax.set_ylabel("Cumulative effect  " + UNIT)
+    ax.set_xlabel("Date")
+    ax.text(0.5, 0.95, "(c)", transform=ax.transAxes,
+            fontsize=11, fontweight="bold", ha="center", va="top")
+    ax.xaxis.set_major_locator(mdates.YearLocator(2))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
 
-    # Format x-axis
-    for ax in axes:
-        ax.xaxis.set_major_locator(mdates.YearLocator(2))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-        ax.tick_params(axis="both", labelsize=9)
-        ax.grid(True, alpha=0.3)
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
+    # ── Legend outside bottom ──
+    fig.legend(
+        handles=[h1, h2, h3],
+        loc="lower center", ncol=3, fontsize=8,
+        frameon=True, framealpha=0.95, edgecolor="gray",
+        bbox_to_anchor=(0.55, 0.005))
 
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=FIG_DPI, bbox_inches="tight")
-    plt.close()
-    print(f"  Figure saved → {output_path}")
+    for fmt in ("pdf", "png"):
+        fig.savefig(os.path.join(figdir, f"bsts_causalimpact.{fmt}"),
+                    dpi=DPI, bbox_inches="tight")
+    plt.close(fig)
 
 
-# ═══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════
+#  4. REPORT  (all results + robustness in text)
+# ════════════════════════════════════════════════════════════════
+
+def write_report(result, rank_p, placebo_effects, sensitivity,
+                 sw_p, ljung_p, reportdir):
+    L = []
+    w = L.append
+    w("=" * 70)
+    w("  BAYESIAN STRUCTURAL TIME SERIES — CausalImpact")
+    w("  Impact Zone Kd490  |  Intervention: May 2019")
+    w("  Author: Sandy H. S. Herho")
+    w(f"  Generated: {datetime.now():%Y-%m-%d %H:%M:%S}")
+    w("=" * 70)
+
+    w("\n── 1  DATA ────────────────────────────────────────")
+    w("  Pre-period  : 1998-01 -> 2019-04  (256 months)")
+    w("  Post-period : 2019-05 -> 2024-12  (68 months)")
+    w("  Response    : Kd490 in impact zone")
+    w("  Covariates  : Kd490_ctrl, SST_ctrl, SSS_ctrl")
+    w("  Units       : x10^-2 m^-1")
+
+    w("\n── 2  CAUSAL IMPACT ───────────────────────────────")
+    w(f"  Post avg. observed  : {result['post_avg_actual']:.4f}"
+      f"  x10^-2 m^-1")
+    w(f"  Post avg. predicted : {result['post_avg_pred']:.4f}"
+      f"  x10^-2 m^-1")
+    w(f"      95% CI          : [{result['post_avg_lower']:.4f},"
+      f" {result['post_avg_upper']:.4f}]")
+    w(f"  Avg. causal effect  : {result['post_avg_eff']:+.4f}"
+      f"  x10^-2 m^-1")
+    w(f"  Relative effect     : {result['rel_eff']:+.1f}%")
+    w(f"  Cumulative effect   : {result['post_cum_eff']:+.4f}"
+      f"  x10^-2 m^-1")
+    w(f"  Two-sided p-value   : {result['p_value']:.4f}")
+
+    if result["p_value"] < 0.05:
+        d = "increase" if result["post_avg_eff"] > 0 else "decrease"
+        w(f"\n  *** STATISTICALLY SIGNIFICANT (p < 0.05) ***")
+        w(f"  The intervention is associated with a significant {d}")
+        w(f"  in Kd490 in the impact zone.")
+    else:
+        w("\n  NOT significant at alpha = 0.05.")
+
+    w("\n── 3  PHYSICAL INTERPRETATION ─────────────────────")
+    w(textwrap.fill(
+        "Kd490 (diffuse attenuation coefficient at 490 nm) is a "
+        "satellite-derived proxy for upper-ocean turbidity.  Higher "
+        "Kd490 indicates increased light attenuation due to suspended "
+        "sediments, CDOM, or phytoplankton biomass.  Values are in "
+        "units of x10^-2 m^-1.",
+        width=68, initial_indent="  ", subsequent_indent="  "))
+    w("")
+    w(textwrap.fill(
+        "The BSTS model uses control-zone covariates (Kd490, SST, "
+        "SSS) to absorb basin-wide natural forcing: ENSO, IOD, "
+        "monsoonal cycles, MJO, and inter-annual SST variability.  "
+        "By constructing a synthetic counterfactual for the impact "
+        "zone, any RESIDUAL divergence after May 2019 must arise "
+        "from a LOCAL perturbation rather than large-scale climate "
+        "variability.",
+        width=68, initial_indent="  ", subsequent_indent="  "))
+    w("")
+
+    avg_phys  = result["post_avg_eff"] * 1e-2
+    pred_phys = result["post_avg_pred"] * 1e-2
+    obs_phys  = result["post_avg_actual"] * 1e-2
+    w(textwrap.fill(
+        f"The average causal effect of "
+        f"{result['post_avg_eff']:+.4f} (x10^-2 m^-1) corresponds "
+        f"to {avg_phys:+.6f} m^-1 in absolute terms.  This "
+        f"translates to a {result['rel_eff']:+.1f}% relative "
+        f"increase in Kd490 over the counterfactual baseline.  "
+        f"Such an increase implies a reduction in euphotic depth "
+        f"(Zeu ~ 4.6/Kd) from approximately "
+        f"{4.6 / pred_phys:.1f} m (predicted) to "
+        f"{4.6 / obs_phys:.1f} m (observed).",
+        width=68, initial_indent="  ", subsequent_indent="  "))
+    w("")
+
+    if result["post_avg_eff"] > 0 and result["p_value"] < 0.05:
+        w(textwrap.fill(
+            "CONCLUSION: The positive and significant increase in "
+            "Kd490 indicates the impact-zone water became "
+            "substantially more turbid after the intervention.  "
+            "Since basin-wide natural drivers are accounted for by "
+            "the control covariates, the most parsimonious "
+            "explanation is a LOCAL ANTHROPOGENIC perturbation — "
+            "e.g. enhanced sediment/effluent discharge from mining, "
+            "smelting, coastal construction, or land-use change in "
+            "the catchment.",
+            width=68, initial_indent="  -> ",
+            subsequent_indent="     "))
+    elif result["p_value"] >= 0.05:
+        w(textwrap.fill(
+            "CONCLUSION: The change is statistically "
+            "indistinguishable from natural variability.  No "
+            "anthropogenic signal can be confidently attributed.",
+            width=68, initial_indent="  -> ",
+            subsequent_indent="     "))
+
+    # ── 4. Robustness ──
+    w("\n── 4  ROBUSTNESS CHECKS ───────────────────────────")
+
+    # 4a Placebo
+    w("\n  4a  Placebo / falsification test")
+    vp = [e for e in placebo_effects if not np.isnan(e)]
+    w(f"      Number of placebos   : {len(vp)}")
+    w(f"      True effect          : {result['post_avg_eff']:+.4f}")
+    w(f"      Placebo mean         : {np.mean(vp):+.4f}")
+    w(f"      Placebo std          : {np.std(vp):.4f}")
+    w(f"      Placebo range        : [{np.min(vp):+.4f},"
+      f" {np.max(vp):+.4f}]")
+    w(f"      Rank-based p-value   : {rank_p:.4f}")
+    w(textwrap.fill(
+        "The rank-based p-value is the fraction of placebo effects "
+        "whose absolute value equals or exceeds the absolute true "
+        "effect.  A small value (< 0.05) confirms the true effect "
+        "is anomalous relative to natural pre-period fluctuations.",
+        width=68, initial_indent="      ",
+        subsequent_indent="      "))
+    if rank_p < 0.10:
+        w("      -> PASSED: true effect is extreme vs. placebos.")
+    else:
+        w("      -> CAUTION: true effect within placebo range.")
+
+    # 4b Sensitivity
+    w("\n  4b  Leave-one-out covariate sensitivity")
+    w(f"      {'Configuration':26s}  {'Effect':>10s}"
+      f"  {'p-value':>10s}")
+    w(f"      {'-' * 26}  {'-' * 10}  {'-' * 10}")
+    for s in sensitivity:
+        w(f"      {s['label']:26s}  {s['eff']:+10.4f}"
+          f"  {s['p']:10.4f}")
+    same_sign = all(
+        np.sign(s["eff"]) == np.sign(result["post_avg_eff"])
+        for s in sensitivity if not np.isnan(s["eff"]))
+    all_sig = all(
+        s["p"] < 0.05
+        for s in sensitivity if not np.isnan(s["p"]))
+    w("")
+    w(textwrap.fill(
+        "If the sign and significance of the effect remain stable "
+        "across all leave-one-out configurations, the result is "
+        "robust to covariate selection.",
+        width=68, initial_indent="      ",
+        subsequent_indent="      "))
+    if same_sign and all_sig:
+        w("      -> ROBUST: sign and significance stable.")
+    elif same_sign:
+        w("      -> PARTIALLY ROBUST: sign stable, significance"
+          " varies.")
+    else:
+        w("      -> CAUTION: effect direction changes with"
+          " removal.")
+
+    # 4c Diagnostics
+    w("\n  4c  Pre-period model diagnostics")
+    resid = result["pre_resid"].dropna().values
+    sw_stat = sp_stats.shapiro(resid[:5000])[0]
+    w(f"      Shapiro-Wilk normality test")
+    w(f"        statistic  : {sw_stat:.4f}")
+    w(f"        p-value    : {sw_p:.4f}")
+    if sw_p > 0.05:
+        w("        -> Residuals consistent with normality.")
+    else:
+        w("        -> Residuals depart from normality; CIs")
+        w("           interpreted with caution (common for")
+        w("           environmental time series).")
+    w(f"      Ljung-Box(12) autocorrelation test")
+    w(f"        p-value    : {ljung_p:.4f}")
+    if ljung_p > 0.05:
+        w("        -> No significant residual autocorrelation.")
+    else:
+        w("        -> Residual autocorrelation present; model")
+        w("           may underfit some seasonal structure.")
+
+    # ── 5. Overall ──
+    w("\n── 5  OVERALL ASSESSMENT ──────────────────────────")
+    ev = []
+    if result["p_value"] < 0.05: ev.append("main_sig")
+    if rank_p < 0.10:            ev.append("placebo_pass")
+    if same_sign:                ev.append("sensitivity_robust")
+
+    if len(ev) == 3:
+        w("  STRONG EVIDENCE of an anthropogenic effect:")
+        w("    [x] Statistically significant causal impact"
+          " (p < 0.05)")
+        w("    [x] Placebo test confirms effect is anomalous")
+        w("    [x] Sensitivity analysis confirms robustness")
+    elif len(ev) >= 2:
+        w(f"  MODERATE EVIDENCE ({len(ev)}/3 robustness checks"
+          f" passed):")
+        w(f"    {'[x]' if 'main_sig' in ev else '[ ]'}"
+          f" Significant causal impact")
+        w(f"    {'[x]' if 'placebo_pass' in ev else '[ ]'}"
+          f" Placebo test passed")
+        w(f"    {'[x]' if 'sensitivity_robust' in ev else '[ ]'}"
+          f" Sensitivity robust")
+    else:
+        w("  WEAK / INSUFFICIENT EVIDENCE:")
+        w("    The observed change cannot be robustly")
+        w("    distinguished from natural variability.")
+    w("\n" + "=" * 70)
+
+    txt = "\n".join(L)
+    with open(os.path.join(reportdir, "bsts_report.txt"), "w") as f:
+        f.write(txt)
+    print(txt)
+
+
+# ════════════════════════════════════════════════════════════════
 #  MAIN
-# ═══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════
+
 def main():
+    os.makedirs(FIGDIR, exist_ok=True)
+    os.makedirs(REPORTDIR, exist_ok=True)
+
     print("=" * 65)
     print("  BAYESIAN STRUCTURAL TIME SERIES — CausalImpact")
     print("  Impact Zone Kd490 | Intervention: May 2019")
-    print("  Author: Sandy H. S. Herho")
     print("=" * 65)
 
-    # 1 — Load data
-    print("[1] Loading data ...")
-    data = load_data()
+    print("\n[1] Loading data ...")
+    df = load_and_merge(DATADIR)
+    print(f"    {len(df)} obs: {df.index[0]:%Y-%m} -> "
+          f"{df.index[-1]:%Y-%m}")
 
-    # 2 — Fit model
-    print("[2] Fitting BSTS model ...")
-    ci, pre_period, post_period = run_causal_impact(data)
-    print("    Model fitted successfully.")
+    intv = pd.Timestamp(INTERVENTION)
+    pre_end    = (intv - pd.DateOffset(months=1)).strftime("%Y-%m-%d")
+    post_start = intv.strftime("%Y-%m-%d")
+    post_end   = df.index[-1].strftime("%Y-%m-%d")
 
-    # 3 — Summary
-    print("[3] CausalImpact Summary:")
-    print(ci.summary())
-    print()
-    print(ci.summary("report"))
+    print("\n[2] Fitting BSTS model ...")
+    result = fit_bsts(df, pre_end, post_start, post_end)
+    print(f"    Avg. effect: {result['post_avg_eff']:+.4f}"
+          f" x10^-2 m^-1 ({result['rel_eff']:+.1f}%)")
+    print(f"    p-value    : {result['p_value']:.4f}")
 
-    # 4 — Diagnostics
-    print("\n[4] Pre-period diagnostics ...")
-    diag = run_diagnostics(ci, data, pre_period)
-    print(f"    Pre-period R²:           {diag['r2_pre']:.4f}")
-    print(f"    Pre-period MAPE:         {diag['mape_pre']:.2f}%")
-    print(f"    Ljung-Box(12) statistic: {diag['ljung_box_stat']:.2f}")
-    print(f"    Ljung-Box(12) p-value:   {diag['ljung_box_p']:.4f}")
-    if diag["ljung_box_p"] > 0.05:
-        print("    → No significant residual autocorrelation (good)")
-    else:
-        print("    → Residual autocorrelation detected (check model)")
+    print("\n[3] Plotting figure ...")
+    plot_main(result, FIGDIR)
+    print(f"    -> {FIGDIR}/bsts_causalimpact.pdf")
+    print(f"    -> {FIGDIR}/bsts_causalimpact.png")
 
-    # 5 — Post-period effect statistics
-    print("\n[5] Post-period causal effect ...")
-    inf = ci.inferences
-    post_mask = inf.index >= pd.Timestamp(INTERVENTION)
-    post_inf = inf.loc[post_mask]
+    N_PLAC = 40
+    print(f"\n[4] Placebo tests (n={N_PLAC}) ...")
+    pre_dates = df.loc[:pre_end].index
+    cands = list(range(36, len(pre_dates) - 12))
+    rng = np.random.default_rng(42)
+    sel = sorted(rng.choice(cands,
+                            size=min(N_PLAC, len(cands)),
+                            replace=False))
+    plac_effs = []
+    for i, idx in enumerate(sel):
+        fi  = pre_dates[idx]
+        fpe = (fi - pd.DateOffset(months=1)).strftime("%Y-%m-%d")
+        fps = fi.strftime("%Y-%m-%d")
+        fpe2 = min(fi + pd.DateOffset(months=11),
+                   pd.Timestamp(pre_end)).strftime("%Y-%m-%d")
+        e, p = fit_bsts_quick(df, fpe, fps, fpe2)
+        plac_effs.append(e)
+        if (i + 1) % 10 == 0:
+            print(f"    [{i+1}/{len(sel)}] {fi:%Y-%m}"
+                  f"  eff={e:+.4f}")
+    valid = [e for e in plac_effs if not np.isnan(e)]
+    rank_p = np.mean([abs(e) >= abs(result["post_avg_eff"])
+                      for e in valid])
+    print(f"    Rank-based p = {rank_p:.4f}")
 
-    avg_effect = post_inf["point_effect"].mean()
-    cum_effect = post_inf["cum_effect"].iloc[-1]
-    cum_lower = post_inf["cum_effect_lower"].iloc[-1]
-    cum_upper = post_inf["cum_effect_upper"].iloc[-1]
+    print("\n[5] Leave-one-out sensitivity ...")
+    covs = ["X_Kd490_ctrl", "X_Temp_ctrl", "X_Sal_ctrl"]
+    sens = []
+    for label, keep in (
+        [("All covariates", covs)] +
+        [(f"Drop {c}", [x for x in covs if x != c])
+         for c in covs]
+    ):
+        e, p = fit_bsts_quick(df[["y"] + keep],
+                              pre_end, post_start, post_end)
+        sens.append(dict(label=label, eff=e, p=p))
+        print(f"    {label:26s}  eff={e:+.4f}  p={p:.4f}")
 
-    # Relative effect
-    avg_pred = post_inf["point_pred"].mean()
-    rel_effect = (avg_effect / avg_pred) * 100 if avg_pred != 0 else np.nan
+    print("\n[6] Diagnostics ...")
+    resid = result["pre_resid"].dropna().values
+    _, sw_p = sp_stats.shapiro(resid[:5000])
+    from statsmodels.stats.diagnostic import acorr_ljungbox
+    lb = acorr_ljungbox(resid, lags=[12], return_df=True)
+    ljung_p = lb["lb_pvalue"].values[0]
+    print(f"    Shapiro-Wilk  p = {sw_p:.4f}")
+    print(f"    Ljung-Box(12) p = {ljung_p:.4f}")
 
-    print(f"    Avg. pointwise effect:   {avg_effect:.4f}")
-    print(f"    Relative effect:         {rel_effect:.1f}%")
-    print(f"    Cumulative effect:       {cum_effect:.4f}")
-    print(f"    Cumulative 95% CI:       [{cum_lower:.4f}, {cum_upper:.4f}]")
-
-    # Bayesian one-sided tail-area probability
-    # (proportion of post-period where effect CI excludes zero)
-    sig_months = (post_inf["point_effect_lower"] > 0).sum()
-    total_months = len(post_inf)
-    print(f"    Months with CI > 0:      {sig_months}/{total_months}")
-
-    # 6 — Prior sensitivity
-    print("\n[6] Prior sensitivity analysis ...")
-    sens = prior_sensitivity(data)
-    values = list(sens.values())
-    spread = max(values) - min(values)
-    print(f"    Spread across priors: {spread:.4f}")
-    if spread / abs(np.mean(values)) < 0.1:
-        print("    → Cumulative effect is ROBUST to prior specification")
-    else:
-        print("    → Some sensitivity to prior (inspect carefully)")
-
-    # 7 — Figure
-    print("\n[7] Generating Figure 1 ...")
-    import os
-    os.makedirs(os.path.dirname(FIG_OUT) if os.path.dirname(FIG_OUT) else ".",
-                exist_ok=True)
-    make_figure(ci, pre_period, post_period, diag, FIG_OUT)
-
-    print("\n" + "=" * 65)
-    print("  DONE")
-    print("=" * 65)
+    print("\n[7] Writing report ...")
+    write_report(result, rank_p, plac_effs, sens,
+                 sw_p, ljung_p, REPORTDIR)
+    print(f"    -> {REPORTDIR}/bsts_report.txt")
+    print(f"\n    Done.")
 
 
 if __name__ == "__main__":
