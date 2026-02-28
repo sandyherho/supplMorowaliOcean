@@ -1,102 +1,604 @@
-======================================================================
+========================================================================
   BAYESIAN STRUCTURAL TIME SERIES — CausalImpact
-  Impact Zone Kd490  |  Intervention: May 2019
-  Author: Sandy H. S. Herho
-  Generated: 2026-02-25 21:51:31
-======================================================================
+  Response    : Kd490, Impact Zone (Morowali Coastal Waters,
+                Tolo Bay / Banda Sea, Central Sulawesi)
+  Intervention: May 2019
+  Author      : Sandy H. S. Herho
+  Generated   : 2026-02-28 18:16:10
+========================================================================
 
-── 1  DATA ────────────────────────────────────────
-  Pre-period  : 1998-01 -> 2019-04  (256 months)
-  Post-period : 2019-05 -> 2024-12  (68 months)
-  Response    : Kd490 in impact zone
-  Covariates  : Kd490_ctrl, SST_ctrl, SSS_ctrl
-  Units       : x10^-2 m^-1
+------------------------------------------------------------------------
+  SECTION 1 — STUDY DESIGN & DATA
+------------------------------------------------------------------------
 
-── 2  CAUSAL IMPACT ───────────────────────────────
-  Post avg. observed  : 5.3807  x10^-2 m^-1
-  Post avg. predicted : 4.7043  x10^-2 m^-1
-      95% CI          : [4.1785, 5.2300]
-  Avg. causal effect  : +0.6765  x10^-2 m^-1
-  Relative effect     : +14.4%
-  Cumulative effect   : +46.0010  x10^-2 m^-1
-  Two-sided p-value   : 0.0117
+  1.1  Response variable
+  ··························································
+  Variable : Kd490 — diffuse attenuation coefficient at 490 nm
+  Units    : x10^-2 m^-1  (stored values are raw x 100)
+  Source   : MODIS/Aqua 4-km Level-3 monthly composites
 
-  *** STATISTICALLY SIGNIFICANT (p < 0.05) ***
-  The intervention is associated with a significant increase
-  in Kd490 in the impact zone.
+  Kd490 quantifies how rapidly blue-green light (490 nm) is attenuated
+  with depth in the upper ocean.  It is a composite optical signal
+  that reflects contributions from pure water, mineral particles (non-
+  algal particles, NAP), phytoplankton pigments, and coloured
+  dissolved organic matter (CDOM).  The satellite retrieval cannot
+  decompose these contributions without auxiliary bio-optical
+  measurements.
 
-── 3  PHYSICAL INTERPRETATION ─────────────────────
-  Kd490 (diffuse attenuation coefficient at 490 nm) is a satellite-
-  derived proxy for upper-ocean turbidity.  Higher Kd490 indicates
-  increased light attenuation due to suspended sediments, CDOM, or
-  phytoplankton biomass.  Values are in units of x10^-2 m^-1.
+  Full optical identity:
+    Kd490 = Kd_water  +  Kd_NAP  +  Kd_phyto  +  Kd_CDOM
+             (pure)     (mineral)  (phytoplankton) (dissolved org)
 
-  The BSTS model uses control-zone covariates (Kd490, SST, SSS) to
-  absorb basin-wide natural forcing: ENSO, IOD, monsoonal cycles,
-  MJO, and inter-annual SST variability.  By constructing a
-  synthetic counterfactual for the impact zone, any RESIDUAL
-  divergence after May 2019 must arise from a LOCAL perturbation
-  rather than large-scale climate variability.
+  1.2  Spatial domains
+  ··························································
+    Impact Zone : Lat [-2.92, -2.72], Lon [122.08, 122.28]
+                  5x5 grid | 16 valid pixels | ~256 km²
+                  Directly off IMIP coastline, Tolo Bay.
+    Control Zone: Lat [-2.75, -2.45], Lon [123.00, 123.40]
+                  7x7 grid | 49 valid pixels | ~784 km²
+                  Open Banda Sea; no industrial proximity.
 
-  The average causal effect of +0.6765 (x10^-2 m^-1) corresponds to
-  +0.006765 m^-1 in absolute terms.  This translates to a +14.4%
-  relative increase in Kd490 over the counterfactual baseline.  Such
-  an increase implies a reduction in euphotic depth (Zeu ~ 4.6/Kd)
-  from approximately 97.8 m (predicted) to 85.5 m (observed).
+  1.3  Time periods
+  ··························································
+    Pre-period  : 1998-01 to 2019-04  (256 months)
+    Post-period : 2019-05 to 2024-12  ( 68 months)
+    Total       : 324 months  (27 years)
+    Burn-in     : First 13 months excluded from plots
+                  (Kalman filter initialisation)
 
-  -> CONCLUSION: The positive and significant increase in Kd490
-     indicates the impact-zone water became substantially more
-     turbid after the intervention.  Since basin-wide natural
-     drivers are accounted for by the control covariates, the most
-     parsimonious explanation is a LOCAL ANTHROPOGENIC perturbation
-     — e.g. enhanced sediment/effluent discharge from mining,
-     smelting, coastal construction, or land-use change in the
-     catchment.
+  1.4  BSTS model specification
+  ··························································
+    Framework   : Unobserved Components Model (UCM)
+    Library     : statsmodels.tsa.statespace.structural
+                  .UnobservedComponents
 
-── 4  ROBUSTNESS CHECKS ───────────────────────────
+    Structural components:
+      (i)  Local linear trend (stochastic level + slope)
+             mu_{t+1}  = mu_t + nu_t + eta_mu
+             nu_{t+1}  = nu_t + eta_nu
+             eta_mu, eta_nu ~ N(0, sigma^2)
+      (ii) Stochastic seasonal  (period = 12 months)
+             sum_{j=0}^{11} gamma_{t-j} = eta_gamma
 
-  4a  Placebo / falsification test
-      Number of placebos   : 40
-      True effect          : +0.6765
-      Placebo mean         : +0.0408
-      Placebo std          : 0.1114
-      Placebo range        : [-0.1780, +0.3251]
-      Rank-based p-value   : 0.0000
-      The rank-based p-value is the fraction of placebo effects
-      whose absolute value equals or exceeds the absolute true
-      effect.  A small value (< 0.05) confirms the true effect is
-      anomalous relative to natural pre-period fluctuations.
-      -> PASSED: true effect is extreme vs. placebos.
+    Exogenous covariates (control-zone proxies):
+      X1 = Kd490_ctrl  — basin-wide optical / turbidity forcing
+      X2 = SST_ctrl    — thermal stratification proxy
+      X3 = SSS_ctrl    — freshwater / river discharge proxy
 
-  4b  Leave-one-out covariate sensitivity
-      Configuration                   Effect     p-value
-      --------------------------  ----------  ----------
-      All covariates                 +0.6765      0.0117
-      Drop X_Kd490_ctrl              +0.7140      0.0180
-      Drop X_Temp_ctrl               +0.6756      0.0132
-      Drop X_Sal_ctrl                +0.6853      0.0109
+    Estimation  : MLE (L-BFGS-B, maxiter = 1000)
 
-      If the sign and significance of the effect remain stable
-      across all leave-one-out configurations, the result is robust
-      to covariate selection.
-      -> ROBUST: sign and significance stable.
+  These covariates absorb basin-scale climate forcing: ENSO, the
+  Indian Ocean Dipole (IOD), Southeast and Northwest Monsoons, and the
+  Madden-Julian Oscillation (MJO).  Any residual post-2019 divergence
+  between the BSTS counterfactual and the observed impact-zone Kd490
+  must therefore originate from a LOCAL perturbation.
 
-  4c  Pre-period model diagnostics
-      Shapiro-Wilk normality test
-        statistic  : 0.6969
-        p-value    : 0.0000
-        -> Residuals depart from normality; CIs
-           interpreted with caution (common for
-           environmental time series).
-      Ljung-Box(12) autocorrelation test
-        p-value    : 0.0000
-        -> Residual autocorrelation present; model
-           may underfit some seasonal structure.
+------------------------------------------------------------------------
+  SECTION 2 — CAUSAL EFFECT ESTIMATES
+------------------------------------------------------------------------
 
-── 5  OVERALL ASSESSMENT ──────────────────────────
-  STRONG EVIDENCE of an anthropogenic effect:
-    [x] Statistically significant causal impact (p < 0.05)
-    [x] Placebo test confirms effect is anomalous
-    [x] Sensitivity analysis confirms robustness
+  2.1  Post-period summary statistics
+  ··························································
+    Observed mean (post)         :     5.380750  x10^-2 m^-1
+    Predicted mean (post)        :     4.704264  x10^-2 m^-1
+    95% CI lower                 :     4.178500  x10^-2 m^-1
+    95% CI upper                 :     5.230029  x10^-2 m^-1
+    Average causal effect        :    +0.676485  x10^-2 m^-1
+    Relative effect              :     +14.3803  %
+    Cumulative effect (68 mo.)   :   +46.001006  x10^-2 m^-1
 
-======================================================================
+  2.2  Step-by-step significance test
+  ··························································
+    Approach: two-sided z-test; SE derived from average
+    95% CI width over the post-period.
+
+    Step 1 — CI width
+      CI_width = CI_upper - CI_lower
+               = 5.230029 - 4.178500
+               = 1.051529  x10^-2 m^-1
+
+    Step 2 — Standard error
+      SE = CI_width / (2 × 1.96)
+         = 1.051529 / 3.92
+         = 0.26824728  x10^-2 m^-1
+
+    Step 3 — z-statistic
+      z = |avg_effect| / SE
+        = 0.676485 / 0.26824728
+        = 2.521872
+
+    Step 4 — Two-sided p-value
+      p = 2 × (1 - Phi(z))
+        = 2 × (1 - Phi(2.521872))
+        = 0.01167321
+
+    Verdict: *   — SIGNIFICANT         (p < 0.05)
+
+  2.3  Relative effect decomposition
+  ··························································
+    rel_eff = (avg_effect / avg_predicted) × 100
+            = (0.676485 / 4.704264) × 100
+            = +14.3803 %
+
+  2.4  Euphotic depth calculation  (Zeu = 4.6 / Kd490)
+  ··························································
+    Reference: Lee et al. (2007) — Zeu is the depth at
+    which PAR falls to 1% of its surface value.
+
+    Counterfactual Kd490 (predicted):
+      4.704264 x10^-2 m^-1  =  0.04704264 m^-1
+      Zeu_predicted = 4.6 / 0.04704264
+                    = 97.784 m
+
+    Observed Kd490:
+      5.380750 x10^-2 m^-1  =  0.05380750 m^-1
+      Zeu_observed  = 4.6 / 0.05380750
+                    = 85.490 m
+
+    ΔZeu = 85.490 - 97.784  =  -12.294 m  (-12.57 %)
+
+------------------------------------------------------------------------
+  SECTION 3 — MONTH-BY-MONTH POST-PERIOD CALCULATIONS
+------------------------------------------------------------------------
+
+  All values in x10^-2 m^-1.  Effect = Observed - Predicted.  CI_Width
+  = Upper95 - Lower95 for that month's counterfactual.  CumEffect =
+  running sum of monthly effects from 2019-05.
+
+  Date        Observed  Predicted    Lower95    Upper95   CI_Width     Effect  CumEffect
+  -----------------------------------------------------------------------------------
+  2019-05       4.8666     4.5066     3.9902     5.0229     1.0327    +0.3600    +0.3600
+  2019-06       7.7828     5.0735     4.5570     5.5900     1.0330    +2.7093    +3.0693
+  2019-07       5.0217     5.1084     4.5918     5.6250     1.0333    -0.0867    +2.9826
+  2019-08       5.3891     5.0920     4.5752     5.6087     1.0335    +0.2971    +3.2798
+  2019-09       5.5565     5.0097     4.4928     5.5266     1.0338    +0.5468    +3.8266
+  2019-10       4.8744     4.7467     4.2297     5.2637     1.0341    +0.1277    +3.9542
+  2019-11       4.8074     4.5803     4.0631     5.0975     1.0343    +0.2270    +4.1813
+  2019-12       4.6004     4.4045     3.8872     4.9218     1.0346    +0.1959    +4.3772
+  2020-01       4.7730     4.4726     3.9555     4.9896     1.0341    +0.3004    +4.6776
+  2020-02       4.4750     4.4487     3.9314     4.9659     1.0344    +0.0264    +4.7040
+  2020-03       4.2720     4.1526     3.6352     4.6699     1.0347    +0.1194    +4.8234
+  2020-04       4.5243     4.2496     3.7321     4.7671     1.0350    +0.2747    +5.0981
+  2020-05       4.3426     4.5050     3.9862     5.0238     1.0376    -0.1624    +4.9357
+  2020-06       6.3891     4.9627     4.4437     5.4817     1.0380    +1.4264    +6.3621
+  2020-07       7.5430     4.9831     4.4640     5.5023     1.0383    +2.5599    +8.9220
+  2020-08       5.1574     4.9305     4.4112     5.4499     1.0387    +0.2269    +9.1488
+  2020-09       5.4231     4.9125     4.3929     5.4320     1.0391    +0.5106    +9.6594
+  2020-10       5.0748     4.7388     4.2191     5.2585     1.0395    +0.3360    +9.9955
+  2020-11       5.3731     4.6160     4.0960     5.1359     1.0398    +0.7571   +10.7526
+  2020-12       5.7508     4.5490     4.0289     5.0692     1.0402    +1.2018   +11.9543
+  2021-01       4.7401     4.5255     4.0056     5.0455     1.0398    +0.2145   +12.1689
+  2021-02       4.4577     4.4481     3.9280     4.9682     1.0403    +0.0096   +12.1785
+  2021-03       4.8705     4.1568     3.6364     4.6771     1.0407    +0.7137   +12.8922
+  2021-04       4.2434     4.2444     3.7238     4.7649     1.0411    -0.0010   +12.8912
+  2021-05       5.0687     4.5379     4.0159     5.0599     1.0440    +0.5308   +13.4220
+  2021-06       5.0924     4.8742     4.3520     5.3964     1.0444    +0.2182   +13.6402
+  2021-07       5.8680     5.0423     4.5199     5.5648     1.0449    +0.8257   +14.4659
+  2021-08       5.0143     4.7614     4.2387     5.2841     1.0454    +0.2529   +14.7188
+  2021-09       5.9564     4.8684     4.3454     5.3913     1.0459    +1.0880   +15.8069
+  2021-10       5.0832     4.7010     4.1778     5.2242     1.0464    +0.3822   +16.1891
+  2021-11       4.5121     4.7011     4.1776     5.2245     1.0469    -0.1890   +16.0001
+  2021-12       4.8285     4.5407     4.0170     5.0645     1.0474    +0.2877   +16.2878
+  2022-01       5.2681     4.5652     4.0417     5.0888     1.0472    +0.7028   +16.9907
+  2022-02       5.2076     4.4776     3.9537     5.0014     1.0477    +0.7300   +17.7207
+  2022-03       4.2043     4.1650     3.6409     4.6891     1.0482    +0.0393   +17.7599
+  2022-04       5.4050     4.2963     3.7719     4.8207     1.0488    +1.1087   +18.8686
+  2022-05       4.9882     4.7035     4.1775     5.2295     1.0520    +0.2847   +19.1533
+  2022-06       5.1468     5.0378     4.5115     5.5641     1.0526    +0.1090   +19.2623
+  2022-07       6.4925     5.2459     4.7193     5.7725     1.0532    +1.2466   +20.5090
+  2022-08       7.6954     4.9985     4.4716     5.5254     1.0538    +2.6970   +23.2059
+  2022-09       5.5384     4.8649     4.3377     5.3922     1.0544    +0.6735   +23.8794
+  2022-10       5.3364     4.8842     4.3566     5.4117     1.0551    +0.4522   +24.3316
+  2022-11       5.6356     4.7141     4.1862     5.2419     1.0557    +0.9215   +25.2531
+  2022-12       5.1380     4.5188     3.9906     5.0470     1.0564    +0.6192   +25.8724
+  2023-01       5.2797     4.5648     4.0367     5.0929     1.0562    +0.7149   +26.5873
+  2023-02       3.9768     4.5472     4.0187     5.0756     1.0569    -0.5703   +26.0170
+  2023-03       5.7493     4.3302     3.8014     4.8590     1.0576    +1.4191   +27.4361
+  2023-04       5.2282     4.4155     3.8863     4.9446     1.0583    +0.8127   +28.2488
+  2023-05       5.0488     4.5713     4.0404     5.1022     1.0618    +0.4775   +28.7263
+  2023-06       5.6719     5.0174     4.4861     5.5486     1.0625    +0.6545   +29.3808
+  2023-07       6.0149     5.0940     4.5623     5.6256     1.0633    +0.9209   +30.3017
+  2023-08       6.0102     5.0408     4.5087     5.5728     1.0640    +0.9695   +31.2712
+  2023-09       5.5473     5.2047     4.6723     5.7371     1.0648    +0.3425   +31.6137
+  2023-10       5.7831     4.7458     4.2130     5.2786     1.0656    +1.0372   +32.6509
+  2023-11       5.4606     4.6041     4.0709     5.1373     1.0664    +0.8565   +33.5074
+  2023-12       5.2403     4.4261     3.8925     4.9597     1.0672    +0.8142   +34.3216
+  2024-01       4.5380     4.6579     4.1243     5.1915     1.0672    -0.1199   +34.2017
+  2024-02       6.1298     4.6491     4.1150     5.1831     1.0681    +1.4807   +35.6824
+  2024-03       5.5329     4.3805     3.8461     4.9150     1.0689    +1.1524   +36.8348
+  2024-04       5.8371     4.5126     3.9777     5.0475     1.0697    +1.3245   +38.1593
+  2024-05       6.2795     4.8686     4.3319     5.4054     1.0735    +1.4108   +39.5702
+  2024-06       6.2723     5.1422     4.6049     5.6794     1.0744    +1.1301   +40.7003
+  2024-07       6.9607     5.2714     4.7337     5.8091     1.0753    +1.6893   +42.3896
+  2024-08       5.6602     4.9547     4.4165     5.4928     1.0763    +0.7055   +43.0951
+  2024-09       5.3437     4.9816     4.4430     5.5203     1.0772    +0.3620   +43.4572
+  2024-10       5.2329     4.7770     4.2379     5.3161     1.0782    +0.4559   +43.9131
+  2024-11       5.4679     4.6596     4.1200     5.1992     1.0791    +0.8083   +44.7214
+  2024-12       5.8363     4.5567     4.0166     5.0967     1.0801    +1.2797   +46.0010
+  -----------------------------------------------------------------------------------
+  MEAN          5.3807     4.7043     4.1785     5.2300     1.0515    +0.6765   +46.0010
+  STD           0.7735     0.2845          —          —          —    +0.6386          —
+  MIN           3.9768     4.1526          —          —          —    -0.5703          —
+  MAX           7.7828     5.2714          —          —          —    +2.7093          —
+
+  Annual aggregates (post-period):
+  Year      Obs_mean  Pred_mean   Effect_mean      Cum_ann    N
+  ----------------------------------------------------------
+  2019        5.3624     4.8152       +0.5471      +4.3772    8
+  2020        5.2582     4.6268       +0.6314      +7.5772   12
+  2021        4.9779     4.6168       +0.3611      +4.3335   12
+  2022        5.5047     4.7060       +0.7987      +9.5845   12
+  2023        5.4176     4.7135       +0.7041      +8.4492   12
+  2024        5.7576     4.7843       +0.9733     +11.6794   12
+
+------------------------------------------------------------------------
+  SECTION 4 — PHYSICAL INTERPRETATION OF THE Kd490 INCREASE
+  STANCE: THE PROXIMATE OPTICAL DRIVER IS AN OPEN QUESTION.
+  Suspended particulate matter (SPM) and phytoplankton /
+  chlorophyll-a (Chl-a) are examined as competing hypotheses.
+  In-situ data are required before either can be asserted.
+------------------------------------------------------------------------
+
+  4.1  Optical decomposition framework
+  ··························································
+  Kd490 measured by satellite is a linear superposition of four
+  optical constituents:
+
+    Kd490 = Kd_w  +  Kd_NAP  +  Kd_phyto  +  Kd_CDOM
+            water   minerals  phytoplankton  dissolved organic
+
+  where Kd_w is essentially constant (~0.0166 m^-1 at 490 nm).  Any
+  satellite-detected Kd490 anomaly therefore reflects a change in NAP
+  (mineral sediment = SPM proxy), phytoplankton standing stock, CDOM,
+  or any combination thereof.  Decomposing the BSTS-estimated causal
+  effect of +0.6765 x10^-2 m^-1 into these constituents is not
+  possible from Kd490 data alone.
+
+  4.2  Hypothesis A — Mineral turbidity (SPM) as primary driver
+  ··························································
+
+  4.2.1  Proposed mechanism
+  IMIP operations disturb large areas of lateritic terrain and
+  generate particulate effluent.  Mineral particles efficiently back-
+  scatter blue-green light and would increase Kd490 without any
+  biological response.  Possible transport pathways include: (i)
+  surface runoff from destabilised hillslopes during rainfall events,
+  (ii) direct effluent or cooling-water discharge from smelting
+  operations carrying fine suspended solids, (iii) coastal dredging
+  and land reclamation resuspending shelf sediments, and (iv)
+  atmospheric deposition of smelter dust.
+
+  4.2.2  Evidence in FAVOUR
+  + Geomorphological context strongly supports efficient
+    particle transport.  The impact zone coastline features
+    a rapid transition from steep lateritic catchments
+    (peak elevation ~2315 m, mean ~478 m) to a sharp deep
+    continental shelf (max depth ~5422 m, mean ~1779 m),
+    minimising storage of particles between land and sea.
+  + Spatial specificity of the signal: the control zone
+    (Banda Sea, 100-150 km away) shows zero structural break
+    and zero trend — entirely consistent with a localised
+    near-shore sediment source at IMIP.
+  + Temporal alignment: the structural break (May 2019)
+    coincides with the pre-emptive capacity scaling phase
+    of IMIP ahead of the January 2020 nickel ore export ban,
+    a period of intense land clearing and construction.
+  + Physical plausibility: even modest SPM concentrations
+    (5-10 mg/L) can increase Kd490 by ~0.01-0.02 m^-1,
+    bracketing the estimated effect of ~0.00676 m^-1.
+
+  4.2.3  Evidence AGAINST / Weaknesses
+  - SPM satellite retrievals (if available) reportedly show
+    no statistically significant concurrent increase in the
+    impact zone, which is the primary challenge for this
+    hypothesis.  However, this may reflect:
+      (a) retrieval uncertainty in coastal waters with
+          complex atmospheric correction;
+      (b) SPM increases below the satellite detection
+          threshold but still optically significant;
+      (c) particle size distribution biased toward fine
+          colloidal material that contributes more to
+          Kd490 than to reflectance-based SPM algorithms.
+  - No gravimetric SPM measurements are available to
+    validate the satellite SPM product in this region.
+  - A pure-SPM driver might be expected to show stronger
+    seasonality locked to monsoon runoff peaks (Oct-Dec),
+    whereas the observed Kd490 elevation appears more
+    persistent across all seasons.
+
+  4.3  Hypothesis B — Phytoplankton / Chl-a (eutrophication)
+       as primary driver
+  ··························································
+
+  4.3.1  Proposed mechanism
+  Industrial activity at IMIP enriches coastal waters with dissolved
+  inorganic nutrients (nitrogen, phosphorus) via: (i) leaching from
+  freshly disturbed lateritic soils (which are naturally phosphorus-
+  rich), (ii) thermal effluent from industrial cooling systems that
+  reduces near-shore thermal stratification and delivers deeper,
+  nutrient-rich water to the photic zone, and (iii) organic waste or
+  slag leachate.  Nutrient enrichment stimulates phytoplankton growth;
+  the resulting elevated biomass and exuded CDOM both absorb strongly
+  at 490 nm, increasing Kd490.
+
+  4.3.2  Evidence in FAVOUR
+  + Chlorophyll-a data indicate elevated concentrations
+    and episodic bloom events in the impact zone post-2019.
+    Bloom Chl-a values of 1-5 mg/m^3 can increase Kd490
+    by 0.005-0.05 m^-1, encompassing the estimated causal
+    effect of ~0.00676 m^-1.
+  + Elevated post-break variance in Kd490:
+    sigma_post = 0.774 vs. sigma_pre = 0.449 x10^-2 m^-1.
+    Episodic bloom dynamics naturally produce high temporal
+    variance, more so than steady-state mineral turbidity.
+  + Consistent with the spatial footprint: nutrient runoff
+    from a diffuse catchment-scale source would create a
+    broad, persistent nearshore enrichment zone matching the
+    impact-zone pixel area (~256 km²).
+  + The CDOM component of algal blooms (exudates, cell
+    lysis products) can persist for weeks after the bloom,
+    providing a sustained Kd490 signal even between bloom
+    episodes.
+
+  4.3.3  Evidence AGAINST / Weaknesses
+  - The Banda Sea is an oligotrophic to mesotrophic system.
+    Sustaining a persistent Chl-a anomaly large enough to
+    cause a ~14% Kd490 increase requires substantial and
+    continuous nutrient inputs; this has not been verified
+    by in-situ chemistry.
+  - Chl-a satellite retrievals (e.g., OC3M algorithm) are
+    subject to atmospheric correction errors and can
+    overestimate phytoplankton biomass in turbid coastal
+    waters where SPM also contributes to reflectance.
+    The Chl-a bloom signal may therefore be partly an
+    artefact of the very SPM increase under Hypothesis A.
+  - No in-situ nutrient profiles, phytoplankton counts,
+    or HPLC pigment data are available to confirm enhanced
+    phytoplankton productivity in the impact zone.
+
+  4.4  Hypothesis C — Mixed / co-occurring drivers
+  ··························································
+  A mixed-source scenario is physically plausible and perhaps most
+  likely.  SPM pulses from intense rainfall events (wet season, Oct-
+  Apr) may dominate the Kd490 signal at certain months, while
+  phytoplankton blooms may dominate in drier months when higher light
+  and accumulated nutrients favour growth.  Both processes would be
+  driven by the same underlying industrial disturbance of the
+  catchment, making them epidemiologically co-occurring even if
+  optically distinct.  The elevated annual-mean Kd490 and the higher
+  post-break variance are both consistent with this composite driver
+  scenario.
+
+  4.5  Structured evidence summary
+  ··························································
+
+  Evidence criterion                         Hyp. A (SPM)  Hyp. B (Chl-a) 
+  ------------------------------------------------------------------------
+  Geomorphological transport potential          Strong        Indirect    
+  SPM satellite signal (reportedly absent)       Weak          Neutral    
+  Chl-a bloom signal (present post-2019)        Neutral       Moderate    
+  Elevated post-break Kd490 variance           Moderate        Strong     
+  Year-round persistence of signal             Ambiguous      Moderate    
+  Spatial specificity (impact not control)    Consistent     Consistent   
+  Temporal alignment with IMIP expansion      Consistent     Consistent   
+  In-situ confirmation available                  No             No       
+  Optical modelling available                     No             No       
+  Consistent with literature magnitudes        Plausible      Plausible   
+
+  OVERALL: Neither hypothesis can be accepted or rejected on the basis
+  of optical remote sensing alone.  The evidence does not clearly
+  favour one over the other.  Both mechanisms are physically
+  plausible, both are consistent with IMIP industrial activity, and
+  both would produce the spatial and temporal pattern observed in the
+  BSTS analysis.  Definitive attribution requires parallel in-situ
+  sampling.
+
+  4.6  Ecological implications (independent of mechanism)
+  ··························································
+  Regardless of the optical driver, the estimated causal effect of
+  +0.6765 x10^-2 m^-1 implies a shoaling of the euphotic zone from ~98
+  m to ~85 m (ΔZeu = -12.3 m, -12.6%).  Under Hypothesis A (SPM):
+  reduced light penetration suppresses benthic phototrophs and
+  compresses the habitat for corals and seagrasses on the steep shelf.
+  Under Hypothesis B (Chl-a): eutrophication can trigger harmful algal
+  blooms (HABs), hypoxic bottom water from decomposition of sinking
+  biomass, and altered zooplankton community composition.  Both are
+  ecologically damaging and warrant immediate monitoring attention.
+
+  4.7  Recommended next steps to resolve the open question
+  ··························································
+    (1) Apply the same BSTS framework independently to
+        SPM and Chl-a satellite time series to formally test
+        whether either shows a statistically significant post-
+        2019 structural break in the impact zone.
+    (2) Apply a quasi-analytical algorithm (e.g. Lee et al.
+        2002 QAA) to decompose Rrs into a_phi, a_CDOM, b_bp,
+        enabling explicit optical partitioning of Kd490.
+    (3) Conduct in-situ sampling for:
+          - SPM (gravimetric, size-fractionated)
+          - Chl-a (fluorometric + HPLC)
+          - Dissolved inorganic nutrients (DIN, DIP, Si)
+          - Spectral absorption (a_ph, a_CDOM, a_NAP)
+    (4) Obtain IMIP discharge logs, effluent chemistry,
+        and land-use change maps to constrain source terms.
+
+------------------------------------------------------------------------
+  SECTION 5 — ROBUSTNESS CHECKS
+------------------------------------------------------------------------
+
+  5a  Placebo / Falsification Test
+  ··························································
+  Methodology: 40 pseudo-intervention dates are drawn uniformly at
+  random (numpy.random.default_rng, seed=42) from pre-period months 36
+  to n_pre-12.  For each placebo, the full BSTS model is re-fitted on
+  data prior to the pseudo-date and the average effect is computed
+  over the 12-month window following that date.  The rank-based
+  p-value is the fraction of |placebo effects| ≥ |true effect|.
+
+  Total placebo runs requested : 40
+  Valid (converged)            : 40
+  Failed / NaN                 : 0
+
+  True post-period effect      :      +0.676485  x10^-2 m^-1
+  |True effect|                :       0.676485  x10^-2 m^-1
+
+  Placebo distribution statistics:
+    N         : 40
+    Mean      :    +0.040770
+    Std       :     0.111381
+    Median    :    +0.028326
+    Q25       :    -0.026425
+    Q75       :    +0.109519
+    Min       :    -0.177955
+    Max       :    +0.325082
+
+  Placebos where |eff| >= |true| : 0 / 40
+  Rank-based p-value             : 0.00000000
+
+  Result: PASSED — true effect is extreme relative to all
+          pre-period placebo fluctuations.
+
+    #  Date               Effect       |Effect|   >= |True|
+  -------------------------------------------------------
+    1  2002-02         +0.303602       0.303602          no
+    2  2002-04         +0.325082       0.325082          no
+    3  2002-05         +0.139045       0.139045          no
+    4  2002-07         +0.062774       0.062774          no
+    5  2002-12         +0.032040       0.032040          no
+    6  2003-11         -0.104756       0.104756          no
+    7  2003-12         -0.113819       0.113819          no
+    8  2004-10         +0.116162       0.116162          no
+    9  2005-10         -0.063833       0.063833          no
+   10  2006-11         +0.025913       0.025913          no
+   11  2007-03         +0.109790       0.109790          no
+   12  2007-04         +0.030739       0.030739          no
+   13  2007-07         +0.109428       0.109428          no
+   14  2008-01         +0.195124       0.195124          no
+   15  2008-04         +0.195173       0.195173          no
+   16  2008-06         +0.206488       0.206488          no
+   17  2008-11         -0.177955       0.177955          no
+   18  2009-12         +0.038064       0.038064          no
+   19  2010-04         +0.018419       0.018419          no
+   20  2010-05         -0.030807       0.030807          no
+   21  2011-03         +0.093932       0.093932          no
+   22  2011-05         +0.081231       0.081231          no
+   23  2011-12         -0.009339       0.009339          no
+   24  2012-02         -0.081532       0.081532          no
+   25  2012-07         -0.022814       0.022814          no
+   26  2013-01         -0.003280       0.003280          no
+   27  2013-06         +0.061723       0.061723          no
+   28  2013-07         +0.121192       0.121192          no
+   29  2014-02         -0.016069       0.016069          no
+   30  2014-06         -0.002707       0.002707          no
+   31  2015-03         +0.045417       0.045417          no
+   32  2015-07         -0.104202       0.104202          no
+   33  2015-08         -0.067528       0.067528          no
+   34  2015-10         -0.010257       0.010257          no
+   35  2016-01         -0.066899       0.066899          no
+   36  2016-03         -0.084005       0.084005          no
+   37  2016-05         -0.024964       0.024964          no
+   38  2016-09         +0.203350       0.203350          no
+   39  2018-01         +0.086390       0.086390          no
+   40  2018-04         +0.014485       0.014485          no
+
+  5b  Leave-One-Out Covariate Sensitivity
+  ··························································
+  The BSTS model is re-estimated four times: once with all three
+  covariates (X_Kd490_ctrl, X_Temp_ctrl, X_Sal_ctrl) and three times
+  each dropping one covariate.  Sign consistency and p < 0.05 are
+  assessed across all runs.
+
+  Configuration                           Effect       p-value    Sig   SameSign
+  ---------------------------------------------------------------------------
+  All covariates                       +0.676485      0.011673      *        YES
+  Drop X_Kd490_ctrl                    +0.713968      0.018041      *        YES
+  Drop X_Temp_ctrl                     +0.675553      0.013162      *        YES
+  Drop X_Sal_ctrl                      +0.685302      0.010932      *        YES
+
+  All same sign   : YES
+  All significant : YES
+  Result: ROBUST — effect sign and significance stable.
+
+  5c  Pre-Period Residual Diagnostics
+  ··························································
+
+  n residuals      : 256
+  Mean             :    +0.00865508
+  Std (ddof=1)     :     0.47386694
+  Min              :    -1.47087209
+  Q25              :    -0.18736351
+  Median           :    -0.02095673
+  Q75              :    +0.14528378
+  Max              :    +3.92187964
+  IQR (Q75-Q25)    :     0.33264729
+  Skewness         :      +3.861114
+  Excess kurtosis  :     +29.995908
+
+  Shapiro-Wilk normality test  (n = 256):
+    H0: residuals ~ Normal
+    W-statistic : 0.69689807
+    p-value     : 0.00000000
+    Decision: REJECT H0  — residuals non-normal.
+    Note: non-normality is common for environmental time
+    series.  Parametric p-values and credible intervals
+    are interpreted with caution.  The rank-based
+    placebo p-value is distribution-free and unaffected.
+
+  Ljung-Box autocorrelation test  (lags = 12):
+    H0: no autocorrelation in residuals up to lag 12
+    p-value     : 0.00000000
+    Decision: REJECT H0  — residual autocorrelation present.
+    Note: the stochastic seasonal component partially
+    accommodates seasonal autocorrelation but may not
+    capture all structure.  The placebo test conclusions
+    remain valid as they are empirically constructed.
+
+------------------------------------------------------------------------
+  SECTION 6 — OVERALL ASSESSMENT
+------------------------------------------------------------------------
+
+  Statistical evidence for a causal effect: STRONG
+  Robustness checks passed: 3 / 3
+
+  [x] Significant causal impact           (p = 0.011673)
+  [x] Placebo falsification passed        (rank-p = 0.000000)
+  [x] Leave-one-out sensitivity robust    (all same sign = True)
+
+  6.1  What this analysis establishes
+  ··························································
+  The BSTS analysis robustly detects a statistically significant,
+  spatially localised increase in Kd490 in the Morowali impact zone
+  beginning around May 2019.  This increase is: (a) significant at p =
+  0.0117; (b) not explainable by basin-scale climate variability
+  (ENSO, IOD, monsoon) because these are absorbed by the control-zone
+  covariates; (c) anomalous relative to 40 pre-period placebo
+  experiments (rank-p = 0.0000); and (d) robust to covariate
+  specification across four leave-one-out configurations.  These facts
+  collectively establish that a LOCAL anthropogenic perturbation is
+  the most parsimonious explanation for the Kd490 increase.
+
+  6.2  What this analysis cannot establish
+  ··························································
+  The BSTS analysis of Kd490 CANNOT determine whether the light-
+  attenuation increase is driven by mineral particles (SPM),
+  phytoplankton biomass (Chl-a and CDOM), or a mixture of both.  It
+  also cannot identify which specific industrial process at IMIP is
+  the proximate source.  Both the SPM and Chl-a hypotheses are
+  consistent with the available satellite data and with the known
+  characteristics of the IMIP industrial complex. In-situ measurements
+  are required to resolve this ambiguity.
+
+  6.3  Ecological consequence (unambiguous regardless of driver)
+  ··························································
+  The estimated causal shoaling of the euphotic zone by 12.3 m (from
+  ~98 m to ~85 m) compresses the depth interval over which net
+  photosynthesis can occur.  This is ecologically significant for
+  benthic primary producers (corals, seagrasses) on the steep shelf
+  immediately offshore of IMIP, and for pelagic productivity
+  throughout the Tolo Bay system.  Whether caused by mineral shading
+  or algal self-shading, the consequence for light availability at
+  depth is identical.
+
+========================================================================
+  END OF REPORT
+========================================================================

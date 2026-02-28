@@ -1,0 +1,273 @@
+========================================================================
+  Sentinel-2 Annual LULC — Class Percentage Report
+  IMIP Impact Zone, Morowali, Central Sulawesi, Indonesia
+  Spatial extent : Lon [122.08, 122.28]  Lat [-2.92, -2.72]
+  Generated      : 2026-02-28 22:52:45
+========================================================================
+
+  Notes:
+  - 'Grid pixels'     : total number of raster cells in the domain.
+  - 'Valid pixels'    : grid pixels with a recognised LULC code
+                        (excludes fill / no-data = -128).
+  - 'Non-cloud pixels': valid pixels whose class is NOT Clouds (10).
+  - Percentages are computed relative to total valid pixels.
+  - Non-cloud % is relative to total valid pixels.
+  - Native pixel resolution: 10 m × 10 m = 100 m² = 0.0001 km².
+
+  Grid dimensions    : 2226 rows × 2226 cols  =  4,955,076 total grid pixels
+
+------------------------------------------------------------------------
+  YEAR 2017   Panel (a)
+------------------------------------------------------------------------
+  Total grid pixels   :      4,955,076  (2226 rows × 2226 cols)
+  No-data (fill=-128) :        171,890
+  Valid pixels        :      4,783,186  (478.3186 km²)
+  Cloud pixels (cl=10):         74,592  (1.559% of valid)
+  Non-cloud pixels    :      4,708,594  (98.441% of valid  |  470.8594 km²)
+
+  Class                   Code       Pixels    % valid   % non-cld    Area (km²)
+  ---------------------- ----- ------------ ---------- ----------- -------------
+  Water                      1    2,810,701    58.762%     59.693%      281.0701
+  Trees                      2    1,548,511    32.374%     32.887%      154.8511
+  Flooded Vegetation         4        8,164     0.171%      0.173%        0.8164
+  Crops                      5       71,985     1.505%      1.529%        7.1985
+  Built Area                 7      122,561     2.562%      2.603%       12.2561
+  Bare Ground                8       34,431     0.720%      0.731%        3.4431
+  Clouds                    10       74,592     1.559%          —        7.4592
+  Rangeland                 11      112,241     2.347%      2.384%       11.2241
+  No-data (fill)             —      171,890          —           —             —
+  TOTAL GRID PIXELS          —    4,955,076          —           —      495.5076
+
+  Dominant class (by valid pixel count) : Water  (58.762%)
+  Cloud cover fraction                  : 1.559%
+  Effective (non-cloud) coverage        : 98.441%
+
+------------------------------------------------------------------------
+  YEAR 2018   Panel (b)
+------------------------------------------------------------------------
+  Total grid pixels   :      4,955,076  (2226 rows × 2226 cols)
+  No-data (fill=-128) :        171,890
+  Valid pixels        :      4,783,186  (478.3186 km²)
+  Cloud pixels (cl=10):         16,631  (0.348% of valid)
+  Non-cloud pixels    :      4,766,555  (99.652% of valid  |  476.6555 km²)
+
+  Class                   Code       Pixels    % valid   % non-cld    Area (km²)
+  ---------------------- ----- ------------ ---------- ----------- -------------
+  Water                      1    2,815,454    58.861%     59.067%      281.5454
+  Trees                      2    1,583,495    33.105%     33.221%      158.3495
+  Flooded Vegetation         4        5,977     0.125%      0.125%        0.5977
+  Crops                      5       79,267     1.657%      1.663%        7.9267
+  Built Area                 7      165,663     3.463%      3.476%       16.5663
+  Bare Ground                8       19,521     0.408%      0.410%        1.9521
+  Clouds                    10       16,631     0.348%          —        1.6631
+  Rangeland                 11       97,178     2.032%      2.039%        9.7178
+  No-data (fill)             —      171,890          —           —             —
+  TOTAL GRID PIXELS          —    4,955,076          —           —      495.5076
+
+  Dominant class (by valid pixel count) : Water  (58.861%)
+  Cloud cover fraction                  : 0.348%
+  Effective (non-cloud) coverage        : 99.652%
+
+------------------------------------------------------------------------
+  YEAR 2019   Panel (c)
+------------------------------------------------------------------------
+  Total grid pixels   :      4,955,076  (2226 rows × 2226 cols)
+  No-data (fill=-128) :        171,890
+  Valid pixels        :      4,783,186  (478.3186 km²)
+  Cloud pixels (cl=10):            721  (0.015% of valid)
+  Non-cloud pixels    :      4,782,465  (99.985% of valid  |  478.2465 km²)
+
+  Class                   Code       Pixels    % valid   % non-cld    Area (km²)
+  ---------------------- ----- ------------ ---------- ----------- -------------
+  Water                      1    2,807,732    58.700%     58.709%      280.7732
+  Trees                      2    1,526,709    31.918%     31.923%      152.6709
+  Flooded Vegetation         4        4,441     0.093%      0.093%        0.4441
+  Crops                      5       68,951     1.442%      1.442%        6.8951
+  Built Area                 7      214,244     4.479%      4.480%       21.4244
+  Bare Ground                8       23,260     0.486%      0.486%        2.3260
+  Clouds                    10          721     0.015%          —        0.0721
+  Rangeland                 11      137,128     2.867%      2.867%       13.7128
+  No-data (fill)             —      171,890          —           —             —
+  TOTAL GRID PIXELS          —    4,955,076          —           —      495.5076
+
+  Dominant class (by valid pixel count) : Water  (58.700%)
+  Cloud cover fraction                  : 0.015%
+  Effective (non-cloud) coverage        : 99.985%
+
+------------------------------------------------------------------------
+  YEAR 2020   Panel (d)
+------------------------------------------------------------------------
+  Total grid pixels   :      4,955,076  (2226 rows × 2226 cols)
+  No-data (fill=-128) :        171,890
+  Valid pixels        :      4,783,186  (478.3186 km²)
+  Cloud pixels (cl=10):          1,374  (0.029% of valid)
+  Non-cloud pixels    :      4,781,812  (99.971% of valid  |  478.1812 km²)
+
+  Class                   Code       Pixels    % valid   % non-cld    Area (km²)
+  ---------------------- ----- ------------ ---------- ----------- -------------
+  Water                      1    2,813,930    58.830%     58.847%      281.3930
+  Trees                      2    1,500,669    31.374%     31.383%      150.0669
+  Flooded Vegetation         4        6,737     0.141%      0.141%        0.6737
+  Crops                      5       90,314     1.888%      1.889%        9.0314
+  Built Area                 7      244,060     5.102%      5.104%       24.4060
+  Bare Ground                8       19,061     0.399%      0.399%        1.9061
+  Clouds                    10        1,374     0.029%          —        0.1374
+  Rangeland                 11      107,041     2.238%      2.239%       10.7041
+  No-data (fill)             —      171,890          —           —             —
+  TOTAL GRID PIXELS          —    4,955,076          —           —      495.5076
+
+  Dominant class (by valid pixel count) : Water  (58.830%)
+  Cloud cover fraction                  : 0.029%
+  Effective (non-cloud) coverage        : 99.971%
+
+------------------------------------------------------------------------
+  YEAR 2021   Panel (e)
+------------------------------------------------------------------------
+  Total grid pixels   :      4,955,076  (2226 rows × 2226 cols)
+  No-data (fill=-128) :        171,890
+  Valid pixels        :      4,783,186  (478.3186 km²)
+  Cloud pixels (cl=10):          9,153  (0.191% of valid)
+  Non-cloud pixels    :      4,774,033  (99.809% of valid  |  477.4033 km²)
+
+  Class                   Code       Pixels    % valid   % non-cld    Area (km²)
+  ---------------------- ----- ------------ ---------- ----------- -------------
+  Water                      1    2,805,943    58.663%     58.775%      280.5943
+  Trees                      2    1,472,421    30.783%     30.842%      147.2421
+  Flooded Vegetation         4       14,879     0.311%      0.312%        1.4879
+  Crops                      5       78,318     1.637%      1.640%        7.8318
+  Built Area                 7      265,592     5.553%      5.563%       26.5592
+  Bare Ground                8       19,790     0.414%      0.415%        1.9790
+  Clouds                    10        9,153     0.191%          —        0.9153
+  Rangeland                 11      117,090     2.448%      2.453%       11.7090
+  No-data (fill)             —      171,890          —           —             —
+  TOTAL GRID PIXELS          —    4,955,076          —           —      495.5076
+
+  Dominant class (by valid pixel count) : Water  (58.663%)
+  Cloud cover fraction                  : 0.191%
+  Effective (non-cloud) coverage        : 99.809%
+
+------------------------------------------------------------------------
+  YEAR 2022   Panel (f)
+------------------------------------------------------------------------
+  Total grid pixels   :      4,955,076  (2226 rows × 2226 cols)
+  No-data (fill=-128) :        171,890
+  Valid pixels        :      4,783,186  (478.3186 km²)
+  Cloud pixels (cl=10):         25,330  (0.530% of valid)
+  Non-cloud pixels    :      4,757,856  (99.470% of valid  |  475.7856 km²)
+
+  Class                   Code       Pixels    % valid   % non-cld    Area (km²)
+  ---------------------- ----- ------------ ---------- ----------- -------------
+  Water                      1    2,818,696    58.929%     59.243%      281.8696
+  Trees                      2    1,393,547    29.134%     29.289%      139.3547
+  Flooded Vegetation         4        5,322     0.111%      0.112%        0.5322
+  Crops                      5       94,478     1.975%      1.986%        9.4478
+  Built Area                 7      349,039     7.297%      7.336%       34.9039
+  Bare Ground                8       16,665     0.348%      0.350%        1.6665
+  Clouds                    10       25,330     0.530%          —        2.5330
+  Rangeland                 11       80,094     1.674%      1.683%        8.0094
+  No-data (fill)             —      171,890          —           —             —
+  TOTAL GRID PIXELS          —    4,955,076          —           —      495.5076
+
+  Dominant class (by valid pixel count) : Water  (58.929%)
+  Cloud cover fraction                  : 0.530%
+  Effective (non-cloud) coverage        : 99.470%
+
+------------------------------------------------------------------------
+  YEAR 2023   Panel (g)
+------------------------------------------------------------------------
+  Total grid pixels   :      4,955,076  (2226 rows × 2226 cols)
+  No-data (fill=-128) :        171,844
+  Valid pixels        :      4,783,232  (478.3232 km²)
+  Cloud pixels (cl=10):         14,987  (0.313% of valid)
+  Non-cloud pixels    :      4,768,245  (99.687% of valid  |  476.8245 km²)
+
+  Class                   Code       Pixels    % valid   % non-cld    Area (km²)
+  ---------------------- ----- ------------ ---------- ----------- -------------
+  Water                      1    2,809,715    58.741%     58.926%      280.9715
+  Trees                      2    1,313,443    27.459%     27.546%      131.3443
+  Flooded Vegetation         4        3,086     0.065%      0.065%        0.3086
+  Crops                      5       84,154     1.759%      1.765%        8.4154
+  Built Area                 7      457,307     9.561%      9.591%       45.7307
+  Bare Ground                8       14,752     0.308%      0.309%        1.4752
+  Clouds                    10       14,987     0.313%          —        1.4987
+  Rangeland                 11       85,788     1.794%      1.799%        8.5788
+  No-data (fill)             —      171,844          —           —             —
+  TOTAL GRID PIXELS          —    4,955,076          —           —      495.5076
+
+  Dominant class (by valid pixel count) : Water  (58.741%)
+  Cloud cover fraction                  : 0.313%
+  Effective (non-cloud) coverage        : 99.687%
+
+------------------------------------------------------------------------
+  YEAR 2024   Panel (h)
+------------------------------------------------------------------------
+  Total grid pixels   :      4,955,076  (2226 rows × 2226 cols)
+  No-data (fill=-128) :        171,256
+  Valid pixels        :      4,783,820  (478.3820 km²)
+  Cloud pixels (cl=10):         31,834  (0.665% of valid)
+  Non-cloud pixels    :      4,751,986  (99.335% of valid  |  475.1986 km²)
+
+  Class                   Code       Pixels    % valid   % non-cld    Area (km²)
+  ---------------------- ----- ------------ ---------- ----------- -------------
+  Water                      1    2,817,567    58.898%     59.292%      281.7567
+  Trees                      2    1,307,457    27.331%     27.514%      130.7457
+  Flooded Vegetation         4        2,850     0.060%      0.060%        0.2850
+  Crops                      5       73,416     1.535%      1.545%        7.3416
+  Built Area                 7      461,789     9.653%      9.718%       46.1789
+  Bare Ground                8       14,301     0.299%      0.301%        1.4301
+  Clouds                    10       31,834     0.665%          —        3.1834
+  Rangeland                 11       74,586     1.559%      1.570%        7.4586
+  No-data (fill)             —      171,256          —           —             —
+  TOTAL GRID PIXELS          —    4,955,076          —           —      495.5076
+
+  Dominant class (by valid pixel count) : Water  (58.898%)
+  Cloud cover fraction                  : 0.665%
+  Effective (non-cloud) coverage        : 99.335%
+
+========================================================================
+  CROSS-YEAR SUMMARY  —  Class percentage (% of valid pixels) by year
+========================================================================
+
+  Class                       2017     2018     2019     2020     2021     2022     2023     2024
+  ----------------------------------------------------------------------------------------------
+  Water                   58.762%  58.861%  58.700%  58.830%  58.663%  58.929%  58.741%  58.898%
+  Trees                   32.374%  33.105%  31.918%  31.374%  30.783%  29.134%  27.459%  27.331%
+  Flooded Vegetation       0.171%   0.125%   0.093%   0.141%   0.311%   0.111%   0.065%   0.060%
+  Crops                    1.505%   1.657%   1.442%   1.888%   1.637%   1.975%   1.759%   1.535%
+  Built Area               2.562%   3.463%   4.479%   5.102%   5.553%   7.297%   9.561%   9.653%
+  Bare Ground              0.720%   0.408%   0.486%   0.399%   0.414%   0.348%   0.308%   0.299%
+  Clouds                   1.559%   0.348%   0.015%   0.029%   0.191%   0.530%   0.313%   0.665%
+  Rangeland                2.347%   2.032%   2.867%   2.238%   2.448%   1.674%   1.794%   1.559%
+
+------------------------------------------------------------------------
+  CROSS-YEAR GRID & CLOUD SUMMARY
+------------------------------------------------------------------------
+  Year         Grid px     Valid px     Cloud px    Cloud%   Non-cloud px   Non-cld%   Non-cld km²
+  ------- ------------ ------------ ------------ --------- -------------- ---------- -------------
+  2017       4,955,076    4,783,186       74,592    1.559%      4,708,594    98.441%      470.8594
+  2018       4,955,076    4,783,186       16,631    0.348%      4,766,555    99.652%      476.6555
+  2019       4,955,076    4,783,186          721    0.015%      4,782,465    99.985%      478.2465
+  2020       4,955,076    4,783,186        1,374    0.029%      4,781,812    99.971%      478.1812
+  2021       4,955,076    4,783,186        9,153    0.191%      4,774,033    99.809%      477.4033
+  2022       4,955,076    4,783,186       25,330    0.530%      4,757,856    99.470%      475.7856
+  2023       4,955,076    4,783,232       14,987    0.313%      4,768,245    99.687%      476.8245
+  2024       4,955,076    4,783,820       31,834    0.665%      4,751,986    99.335%      475.1986
+
+------------------------------------------------------------------------
+  BUILT AREA TREND  (key IMIP indicator)
+------------------------------------------------------------------------
+  2017:      122,561 px     2.5623%
+  2018:      165,663 px     3.4634%
+  2019:      214,244 px     4.4791%
+  2020:      244,060 px     5.1025%
+  2021:      265,592 px     5.5526%
+  2022:      349,039 px     7.2972%
+  2023:      457,307 px     9.5606%
+  2024:      461,789 px     9.6531%
+
+  Change 2017 → 2024 :  +7.0908 percentage points
+  INCREASING — consistent with IMIP expansion.
+
+========================================================================
+  END OF REPORT
+========================================================================
