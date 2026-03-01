@@ -1,57 +1,61 @@
-============================================================================
+==============================================================================
   INTENSITY ANALYSIS OF LULC TRANSITIONS
   IMIP Impact Zone, Morowali, Central Sulawesi, Indonesia
-  Framework: Aldwaik & Pontius (2012), Land Use Policy 29(1), 643-656
-============================================================================
+  Aldwaik & Pontius (2012), Land Use Policy 29(1), 643-656
+  Extensions: chi-square, Wilson CI, Q-E-S, Cohen's h, Markov G-test
+==============================================================================
   Author      : Sandy H. S. Herho
-  Generated   : 2026-03-01 01:22:55
-  LULC Source : Google Dynamic World / ESA WorldCover (Sentinel-2, 10 m)
+  Generated   : 2026-03-01 21:14:21
+  LULC Source : Sentinel-2 10 m (Dynamic World / ESA WorldCover)
   Domain      : Lon [122.08, 122.28], Lat [-2.92, -2.72]
-  Years       : 2017 to 2024 (8 annual snapshots)
+  Years       : 2017 to 2024 (8 snapshots)
   Intervals   : 7 consecutive year-pairs
-  Pixel size  : 10 m x 10 m = 0.0001 km2
-  Classes     : 6 land classes (Water and Clouds excluded)
-  Exclusions  : Water (class 1, >58% domain, stable); Clouds
-                (class 10, noise); no-data/fill pixels per interval.
-============================================================================
+  Pixel       : 10 m x 10 m = 0.0001 km2
+  Classes     : 6 land (Water, Clouds excluded)
+  CI          : Wilson score, alpha = 0.05
+==============================================================================
 
-----------------------------------------------------------------------------
-  NOTATION AND DEFINITIONS
-----------------------------------------------------------------------------
+------------------------------------------------------------------------------
+  NOTATION
+------------------------------------------------------------------------------
 
-  S_t   = Annual change intensity for interval t (%/yr)
-        = (changed pixels / total valid pixels) x 100 / duration
-  U_int = Uniform interval intensity: expected rate if change
-          were spread evenly across all intervals
-  G_j   = Gain intensity of category j (%)
-        = (pixels gained by j / total size of j at end) x 100
-  L_j   = Loss intensity of category j (%)
-        = (pixels lost by j / total size of j at start) x 100
-  U_cat = Uniform category intensity (%)
-  R_ij  = Transition intensity: when j gains, intensity of
-          sourcing from i = (i->j pixels / total loss of i) x 100
-  W_j   = Uniform transition threshold for gains of j
-  Active   = Observed intensity > Uniform expectation
-  Dormant  = Observed intensity <= Uniform expectation
+  S_t   = Annual change intensity (%/yr)
+        = (changed / total) x 100 / duration
+  U_int = Uniform interval threshold (%/yr)
+  G_j   = Gain intensity = gain_j / end_size_j x 100
+  L_j   = Loss intensity = loss_j / start_size_j x 100
+  U_cat = Uniform category threshold (%)
 
-----------------------------------------------------------------------------
+  R_ij  = Transition intensity (gain perspective)     [A&P Eq. 8]
+        = C_ij / C_i+  x 100
+          C_ij = pixels from i to j;  C_i+ = START size of i
+  W_j   = Uniform gain threshold                      [A&P Eq. 9]
+        = Gain_j / SUM_{i!=j} C_i+
+
+  Q_jk  = Transition intensity (loss perspective)     [A&P Eq. 12]
+        = C_jk / C_+k  x 100
+          C_jk = pixels from j to k;  C_+k = END size of k
+  V_j   = Uniform loss threshold                      [A&P Eq. 13]
+        = Loss_j / SUM_{k!=j} C_+k
+
+  h     = Cohen's h = 2*arcsin(sqrt(p_obs)) - 2*arcsin(sqrt(p_exp))
+          |h| >= 0.8: large;  >= 0.5: medium;  >= 0.2: small;  < 0.2: negligible
+  Q,E,S = Quantity, Exchange, Shift (Pontius 2019)
+  Active   = observed > uniform;  Dormant = observed <= uniform
+
+------------------------------------------------------------------------------
   SECTION 1 -- TRANSITION MATRICES
-----------------------------------------------------------------------------
-
-  Each matrix cross-tabulates pixel-level class assignments between
-  consecutive years. Only pixels valid (non-fill, non-cloud) in BOTH
-  years are counted. Diagonal = persistence; off-diagonal = transitions.
-  Units: pixel counts (multiply by 0.0001 for km2).
+------------------------------------------------------------------------------
 
   --- 2017 -> 2018 ---
   Valid land pixels :    4,697,662
   Persisted         :    1,751,065  (93.31%)
   Changed           :      125,501  (6.69%)
   Changed area      :        12.55 km2
-  From\To     Trees    FlVeg    Crops    Built     Bare    Range     Total
+  From\To     Trees   Fl.Veg    Crops    Built     Bare    Range     Total
   ------------------------------------------------------------------------
   Trees   1,488,890    1,265    7,296   18,984        0   17,947 1,534,382
-  FlVeg         295    4,321        0       35        0        1     4,652
+  Fl.Veg        295    4,321        0       35        0        1     4,652
   Crops       6,386        8   51,265    7,185        0    6,281    71,125
   Built         806        0      330  119,646      722      568   122,072
   Bare           21        0    2,697   10,891   17,493    2,217    33,319
@@ -73,10 +77,10 @@
   Persisted         :    1,806,804  (92.84%)
   Changed           :      139,402  (7.16%)
   Changed area      :        13.94 km2
-  From\To     Trees    FlVeg    Crops    Built     Bare    Range     Total
+  From\To     Trees   Fl.Veg    Crops    Built     Bare    Range     Total
   ------------------------------------------------------------------------
   Trees   1,498,238      168    7,243   27,199        0   47,415 1,580,263
-  FlVeg       1,437    4,071        0        0        0      166     5,674
+  Fl.Veg      1,437    4,071        0        0        0      166     5,674
   Crops       3,516        3   53,903    9,509        0   12,032    78,963
   Built         821        0      290  161,359    2,309      774   165,553
   Bare            3        0      742    2,767   14,928      696    19,136
@@ -98,10 +102,10 @@
   Persisted         :    1,831,372  (93.24%)
   Changed           :      132,719  (6.76%)
   Changed area      :        13.27 km2
-  From\To     Trees    FlVeg    Crops    Built     Bare    Range     Total
+  From\To     Trees   Fl.Veg    Crops    Built     Bare    Range     Total
   ------------------------------------------------------------------------
   Trees   1,468,416    1,833   10,796   20,358        0   20,172 1,521,575
-  FlVeg         176    3,915        2        1        0        0     4,094
+  Fl.Veg        176    3,915        2        1        0        0     4,094
   Crops       4,273        0   54,715    7,141        0    2,497    68,626
   Built       3,668        5    1,821  205,351    1,087    1,157   213,089
   Bare            8        0      762    2,057   17,090    1,165    21,082
@@ -123,10 +127,10 @@
   Persisted         :    1,807,765  (92.60%)
   Changed           :      144,524  (7.40%)
   Changed area      :        14.45 km2
-  From\To     Trees    FlVeg    Crops    Built     Bare    Range     Total
+  From\To     Trees   Fl.Veg    Crops    Built     Bare    Range     Total
   ------------------------------------------------------------------------
   Trees   1,431,978      137   14,999   17,379        0   29,299 1,493,792
-  FlVeg         869    5,613        0        0        0        5     6,487
+  Fl.Veg        869    5,613        0        0        0        5     6,487
   Crops      11,048       48   55,916   11,117        0   11,613    89,742
   Built       3,926        0    1,412  227,343    2,945    1,987   237,613
   Bare            0        3      242    1,202   15,323    1,716    18,486
@@ -148,10 +152,10 @@
   Persisted         :    1,734,921  (89.99%)
   Changed           :      192,905  (10.01%)
   Changed area      :        19.29 km2
-  From\To     Trees    FlVeg    Crops    Built     Bare    Range     Total
+  From\To     Trees   Fl.Veg    Crops    Built     Bare    Range     Total
   ------------------------------------------------------------------------
   Trees   1,366,810      830   16,894   51,805        0   19,218 1,455,557
-  FlVeg       1,391    3,904        0        4        0        5     5,304
+  Fl.Veg      1,391    3,904        0        4        0        5     5,304
   Crops       4,655       23   50,224   15,876        0    7,065    77,843
   Built       1,702       19    1,724  250,767    3,216    1,220   258,648
   Bare            0        0      868    2,848   12,611    1,144    17,471
@@ -173,10 +177,10 @@
   Persisted         :    1,741,438  (90.50%)
   Changed           :      182,717  (9.50%)
   Changed area      :        18.27 km2
-  From\To     Trees    FlVeg    Crops    Built     Bare    Range     Total
+  From\To     Trees   Fl.Veg    Crops    Built     Bare    Range     Total
   ------------------------------------------------------------------------
   Trees   1,293,779      393   15,450   40,573        0   33,920 1,384,115
-  FlVeg         425    2,496       30      482        0      467     3,900
+  Fl.Veg        425    2,496       30      482        0      467     3,900
   Crops       3,633        0   57,456   22,360        0   10,607    94,056
   Built         554        0    1,776  343,070    1,120      979   347,499
   Bare           10        0    1,057    4,700    9,541      806    16,114
@@ -198,10 +202,10 @@
   Persisted         :    1,799,860  (93.73%)
   Changed           :      120,501  (6.27%)
   Changed area      :        12.05 km2
-  From\To     Trees    FlVeg    Crops    Built     Bare    Range     Total
+  From\To     Trees   Fl.Veg    Crops    Built     Bare    Range     Total
   ------------------------------------------------------------------------
   Trees   1,272,285      308    7,010    7,094        0   14,400 1,301,097
-  FlVeg         612    2,173        0       72        0        8     2,865
+  Fl.Veg        612    2,173        0       72        0        8     2,865
   Crops       8,943        0   47,485    9,959        0   17,093    83,480
   Built       4,114        0    5,875  429,497    4,182    1,644   445,312
   Bare           19        0        1    1,305    9,299      737    11,361
@@ -218,200 +222,270 @@
   Bare Ground             4,182       0.42      2,062       0.21     +2,120      4,124
   Rangeland              33,882       3.39     37,125       3.71     -3,243     67,764
 
-----------------------------------------------------------------------------
+------------------------------------------------------------------------------
   SECTION 2 -- LEVEL 1: INTERVAL INTENSITY
-----------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-  Tests whether the overall rate of LULC change in each interval
-  is faster or slower than the uniform rate across the study period.
+  Total changed (all intervals):    1,038,269
+  Total valid   (all intervals):   13,511,494
+  Duration: 7 years
+  U_int = (1038269/13511494 x 100) / 7 = 1.0978 %/yr
 
-  Computation:
-    Total changed pixels (summed over all intervals):    1,038,269
-    Total valid pixels   (summed over all intervals):   13,511,494
-    Total duration: 7 years
-    U_int = (1038269/13511494 x 100) / 7
-          = 1.0978 %/yr
+  Interval        Changed        Total      km2        S_t    U_int    S/U                95%CI   Status
+  ----------------------------------------------------------------------------------------------------
+  2017-2018       125,501    1,876,566    12.55    6.6878%  1.0978%   6.1x [6.6521,6.7236]%   ACTIVE
+  2018-2019       139,402    1,946,206    13.94    7.1628%  1.0978%   6.5x [7.1266,7.1991]%   ACTIVE
+  2019-2020       132,719    1,964,091    13.27    6.7573%  1.0978%   6.2x [6.7223,6.7925]%   ACTIVE
+  2020-2021       144,524    1,952,289    14.45    7.4028%  1.0978%   6.7x [7.3662,7.4396]%   ACTIVE
+  2021-2022       192,905    1,927,826    19.29   10.0063%  1.0978%   9.1x [9.9641,10.0488]%   ACTIVE
+  2022-2023       182,717    1,924,155    18.27    9.4960%  1.0978%   8.7x [9.4546,9.5375]%   ACTIVE
+  2023-2024       120,501    1,920,361    12.05    6.2749%  1.0978%   5.7x [6.2407,6.3093]%   ACTIVE
 
-  Interval          Changed        Total  Area(km2)  S_t(%/yr)    U_int   S_t/U     Status
-  -------------------------------------------------------------------------------------
-  2017–2018         125,501    1,876,566      12.55    6.6878%  1.0978%    6.1x     ACTIVE
-  2018–2019         139,402    1,946,206      13.94    7.1628%  1.0978%    6.5x     ACTIVE
-  2019–2020         132,719    1,964,091      13.27    6.7573%  1.0978%    6.2x     ACTIVE
-  2020–2021         144,524    1,952,289      14.45    7.4028%  1.0978%    6.7x     ACTIVE
-  2021–2022         192,905    1,927,826      19.29   10.0063%  1.0978%    9.1x     ACTIVE
-  2022–2023         182,717    1,924,155      18.27    9.4960%  1.0978%    8.7x     ACTIVE
-  2023–2024         120,501    1,920,361      12.05    6.2749%  1.0978%    5.7x     ACTIVE
+  Chi-square (H0: uniform): chi2=32221.31, df=6, p=0.00e+00
+  -> Reject H0 at alpha=0.05.
 
-  Result: ALL 7 intervals are ACTIVE.
-  Peak  : 2021–2022 at 10.0063% (9.1x uniform)
-  Lowest: 2023–2024 at 6.2749% (5.7x uniform)
+  Result: 7/7 intervals ACTIVE.
+  Peak  : 2021-2022 (10.0063%, 9.1x)
+  Lowest: 2023-2024 (6.2749%, 5.7x)
 
-----------------------------------------------------------------------------
+------------------------------------------------------------------------------
   SECTION 3 -- LEVEL 2: CATEGORY INTENSITY
-----------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-  Tests whether each category's gain/loss is disproportionate
-  relative to the overall landscape change rate.
-  Aggregated across all 7 intervals.
+  U_cat = 7.6843%
 
-  Computation:
-    Total land pixels (aggregated start):   13,511,494
-    Total gross gain:     1,038,269 (103.83 km2)
-    Total gross loss:     1,038,269 (103.83 km2)
-    U_cat = (2076538/27022988 x 100) ... see formula
-    U_cat = 7.6843%
+  Category                  Start          End   Net(km2)      G_j            95%CI   G      L_j            95%CI   L
+  -------------------------------------------------------------------------------------------------------------------
+  Trees                10,270,781   10,001,001     -26.98    1.81% [1.80,1.81]   d    4.39% [4.37,4.40]   d
+  Flooded Vegetation       32,976       32,303      -0.07   17.99% [17.57,18.41]   A   19.66% [19.23,20.09]   A
+  Crops                   563,835      564,692      +0.09   34.31% [34.18,34.43]   A   34.21% [34.08,34.33]   A
+  Built Area            1,789,786    2,112,557     +32.28   17.78% [17.72,17.83]   A    2.95% [2.92,2.97]   d
+  Bare Ground             136,969      111,866      -2.51   13.93% [13.73,14.13]   A   29.70% [29.46,29.95]   A
+  Rangeland               717,147      689,075      -2.81   38.75% [38.64,38.87]   A   41.15% [41.03,41.26]   A
 
-  Category              Start(px)      End(px)   Net(km2)   G_j(%)  Gain   L_j(%)  Loss
-  ----------------------------------------------------------------------------------
-  Trees                10,270,781   10,001,001     -26.98    1.81%   dor    4.39%   dor
-  Flooded Vegetation       32,976       32,303      -0.07   17.99%   ACT   19.66%   ACT
-  Crops                   563,835      564,692      +0.09   34.31%   ACT   34.21%   ACT
-  Built Area            1,789,786    2,112,557     +32.28   17.78%   ACT    2.95%   dor
-  Bare Ground             136,969      111,866      -2.51   13.93%   ACT   29.70%   ACT
-  Rangeland               717,147      689,075      -2.81   38.75%   ACT   41.15%   ACT
+  Chi2 gain: 2126132.89, df=5, p=0.00e+00
+  Chi2 loss: 1851562.86, df=5, p=0.00e+00
 
-  Uniform threshold U_cat = 7.6843%
+  Active gain : Flooded Vegetation, Crops, Built Area, Bare Ground, Rangeland
+  Dormant gain: Trees
+  Active loss : Flooded Vegetation, Crops, Bare Ground, Rangeland
+  Dormant loss: Trees, Built Area
 
-  Active gain  : Flooded Vegetation, Crops, Built Area, Bare Ground, Rangeland
-  Dormant gain : Trees
-  Active loss  : Flooded Vegetation, Crops, Bare Ground, Rangeland
-  Dormant loss : Trees, Built Area
-
-----------------------------------------------------------------------------
+------------------------------------------------------------------------------
   SECTION 4 -- LEVEL 3: TRANSITION INTENSITY
-----------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-  Tests whether specific class-to-class transitions are
-  statistically targeted or avoided. Aggregated across all intervals.
+  Denominators per Aldwaik & Pontius (2012):
+    Gain: R_ij = C_ij / C_i+  (start size of source)    [Eq. 8]
+    Loss: Q_jk = C_jk / C_+k  (end size of target)      [Eq. 12]
 
   === GAIN PERSPECTIVE ===
 
-  Gains of Trees (total: 180,605 px = 18.06 km2, W_j = 5.5730%)
-  Source                 Pixels      km2   R_ij(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Flooded Vegetation      5,205     0.52  80.2869%  5.5730%   14.4x   TARGETED
-  Rangeland             117,294    11.73  39.7481%  5.5730%    7.1x   TARGETED
-  Built Area             15,591     1.56  29.5547%  5.5730%    5.3x   TARGETED
-  Crops                  42,454     4.25  22.0116%  5.5730%    3.9x   TARGETED
-  Bare Ground                61     0.01   0.1499%  5.5730%    0.0x    avoided
+  Gains of Trees (180,605 px = 18.06 km2, W_j = 5.5730%)
+    chi2=238167.05, df=4, p=0.00e+00
+  Source                 Pixels      km2         C_i+      R_ij      W_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Rangeland             117,294    11.73      717,147  16.3556%  5.5730%    2.9x +0.356      small   TARGETED
+  Flooded Vegetation      5,205     0.52       32,976  15.7842%  5.5730%    2.8x +0.340      small   TARGETED
+  Crops                  42,454     4.25      563,835   7.5295%  5.5730%    1.4x +0.079 negligible   TARGETED
+  Built Area             15,591     1.56    1,789,786   0.8711%  5.5730%    0.2x -0.290      small    avoided
+  Bare Ground                61     0.01      136,969   0.0445%  5.5730%    0.0x -0.434      small    avoided
 
-  Gains of Flooded Vegetation (total: 5,810 px = 0.58 km2, W_j = 0.0431%)
-  Source                 Pixels      km2   R_ij(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Trees                   4,934     0.49   1.0955%  0.0431%   25.4x   TARGETED
-  Rangeland                 767     0.08   0.2599%  0.0431%    6.0x   TARGETED
-  Built Area                 24     0.00   0.0455%  0.0431%    1.1x   TARGETED
-  Crops                      82     0.01   0.0425%  0.0431%    1.0x    avoided
-  Bare Ground                 3     0.00   0.0074%  0.0431%    0.2x    avoided
+  Gains of Flooded Vegetation (5,810 px = 0.58 km2, W_j = 0.0431%)
+    chi2=1620.32, df=4, p=0.00e+00
+  Source                 Pixels      km2         C_i+      R_ij      W_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Rangeland                 767     0.08      717,147   0.1070%  0.0431%    2.5x +0.024 negligible   TARGETED
+  Trees                   4,934     0.49   10,270,781   0.0480%  0.0431%    1.1x +0.002 negligible   TARGETED
+  Crops                      82     0.01      563,835   0.0145%  0.0431%    0.3x -0.017 negligible    avoided
+  Bare Ground                 3     0.00      136,969   0.0022%  0.0431%    0.1x -0.032 negligible    avoided
+  Built Area                 24     0.00    1,789,786   0.0013%  0.0431%    0.0x -0.034 negligible    avoided
 
-  Gains of Crops (total: 193,728 px = 19.37 km2, W_j = 1.4962%)
-  Source                 Pixels      km2   R_ij(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Rangeland              94,411     9.44  31.9936%  1.4962%   21.4x   TARGETED
-  Built Area             13,228     1.32  25.0754%  1.4962%   16.8x   TARGETED
-  Trees                  79,688     7.97  17.6933%  1.4962%   11.8x   TARGETED
-  Bare Ground             6,369     0.64  15.6548%  1.4962%   10.5x   TARGETED
-  Flooded Vegetation         32     0.00   0.4936%  1.4962%    0.3x    avoided
+  Gains of Crops (193,728 px = 19.37 km2, W_j = 1.4962%)
+    chi2=704607.55, df=4, p=0.00e+00
+  Source                 Pixels      km2         C_i+      R_ij      W_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Rangeland              94,411     9.44      717,147  13.1648%  1.4962%    8.8x +0.497      small   TARGETED
+  Bare Ground             6,369     0.64      136,969   4.6500%  1.4962%    3.1x +0.189 negligible   TARGETED
+  Trees                  79,688     7.97   10,270,781   0.7759%  1.4962%    0.5x -0.069 negligible    avoided
+  Built Area             13,228     1.32    1,789,786   0.7391%  1.4962%    0.5x -0.073 negligible    avoided
+  Flooded Vegetation         32     0.00       32,976   0.0970%  1.4962%    0.1x -0.183 negligible    avoided
 
-  Gains of Built Area (total: 375,524 px = 37.55 km2, W_j = 3.2037%)
-  Source                 Pixels      km2   R_ij(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Bare Ground            25,770     2.58  63.3419%  3.2037%   19.8x   TARGETED
-  Crops                  83,147     8.31  43.1102%  3.2037%   13.5x   TARGETED
-  Trees                 183,392    18.34  40.7189%  3.2037%   12.7x   TARGETED
-  Rangeland              82,621     8.26  27.9983%  3.2037%    8.7x   TARGETED
-  Flooded Vegetation        594     0.06   9.1624%  3.2037%    2.9x   TARGETED
+  Gains of Built Area (375,524 px = 37.55 km2, W_j = 3.2037%)
+    chi2=558213.64, df=4, p=0.00e+00
+  Source                 Pixels      km2         C_i+      R_ij      W_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Bare Ground            25,770     2.58      136,969  18.8145%  3.2037%    5.9x +0.537     medium   TARGETED
+  Crops                  83,147     8.31      563,835  14.7467%  3.2037%    4.6x +0.428      small   TARGETED
+  Rangeland              82,621     8.26      717,147  11.5208%  3.2037%    3.6x +0.333      small   TARGETED
+  Flooded Vegetation        594     0.06       32,976   1.8013%  3.2037%    0.6x -0.091 negligible    avoided
+  Trees                 183,392    18.34   10,270,781   1.7856%  3.2037%    0.6x -0.092 negligible    avoided
 
-  Gains of Bare Ground (total: 15,581 px = 1.56 km2, W_j = 0.1165%)
-  Source                 Pixels      km2   R_ij(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Built Area             15,581     1.56  29.5358%  0.1165%  253.5x   TARGETED
+  Gains of Bare Ground (15,581 px = 1.56 km2, W_j = 0.1165%)
+    chi2=100851.06, df=4, p=0.00e+00
+  Source                 Pixels      km2         C_i+      R_ij      W_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Built Area             15,581     1.56    1,789,786   0.8706%  0.1165%    7.5x +0.119 negligible   TARGETED
 
-  Gains of Rangeland (total: 267,021 px = 26.70 km2, W_j = 2.0870%)
-  Source                 Pixels      km2   R_ij(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Trees                 182,371    18.24  40.4922%  2.0870%   19.4x   TARGETED
-  Crops                  67,188     6.72  34.8357%  2.0870%   16.7x   TARGETED
-  Bare Ground             8,481     0.85  20.8460%  2.0870%   10.0x   TARGETED
-  Built Area              8,329     0.83  15.7887%  2.0870%    7.6x   TARGETED
-  Flooded Vegetation        652     0.07  10.0571%  2.0870%    4.8x   TARGETED
+  Gains of Rangeland (267,021 px = 26.70 km2, W_j = 2.0870%)
+    chi2=299398.74, df=4, p=0.00e+00
+  Source                 Pixels      km2         C_i+      R_ij      W_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Crops                  67,188     6.72      563,835  11.9163%  2.0870%    5.7x +0.415      small   TARGETED
+  Bare Ground             8,481     0.85      136,969   6.1919%  2.0870%    3.0x +0.213      small   TARGETED
+  Flooded Vegetation        652     0.07       32,976   1.9772%  2.0870%    0.9x -0.008 negligible    avoided
+  Trees                 182,371    18.24   10,270,781   1.7756%  2.0870%    0.9x -0.023 negligible    avoided
+  Built Area              8,329     0.83    1,789,786   0.4654%  2.0870%    0.2x -0.153 negligible    avoided
 
   === LOSS PERSPECTIVE ===
 
-  Losses of Trees (total: 450,385 px = 45.04 km2, W_j = 12.8297%)
-  Target                 Pixels      km2   R_jk(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Flooded Vegetation      4,934     0.49  84.9225% 12.8297%    6.6x   TARGETED
-  Rangeland             182,371    18.24  68.2984% 12.8297%    5.3x   TARGETED
-  Built Area            183,392    18.34  48.8363% 12.8297%    3.8x   TARGETED
-  Crops                  79,688     7.97  41.1340% 12.8297%    3.2x   TARGETED
+  Losses of Trees (450,385 px = 45.04 km2, V_j = 12.8297%)
+    chi2=143439.38, df=4, p=0.00e+00
+  Target                 Pixels      km2         C_+k      Q_jk      V_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Rangeland             182,371    18.24      689,075  26.4661% 12.8297%    2.1x +0.348      small   TARGETED
+  Flooded Vegetation      4,934     0.49       32,303  15.2741% 12.8297%    1.2x +0.070 negligible   TARGETED
+  Crops                  79,688     7.97      564,692  14.1118% 12.8297%    1.1x +0.038 negligible   TARGETED
+  Built Area            183,392    18.34    2,112,557   8.6810% 12.8297%    0.7x -0.134 negligible    avoided
 
-  Losses of Flooded Vegetation (total: 6,483 px = 0.65 km2, W_j = 0.0481%)
-  Target                 Pixels      km2   R_jk(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Trees                   5,205     0.52   2.8820%  0.0481%   59.9x   TARGETED
-  Rangeland                 652     0.07   0.2442%  0.0481%    5.1x   TARGETED
-  Built Area                594     0.06   0.1582%  0.0481%    3.3x   TARGETED
-  Crops                      32     0.00   0.0165%  0.0481%    0.3x    avoided
+  Losses of Flooded Vegetation (6,483 px = 0.65 km2, V_j = 0.0481%)
+    chi2=783.00, df=4, p=3.69e-168
+  Target                 Pixels      km2         C_+k      Q_jk      V_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Rangeland                 652     0.07      689,075   0.0946%  0.0481%    2.0x +0.018 negligible   TARGETED
+  Trees                   5,205     0.52   10,001,001   0.0520%  0.0481%    1.1x +0.002 negligible   TARGETED
+  Built Area                594     0.06    2,112,557   0.0281%  0.0481%    0.6x -0.010 negligible    avoided
+  Crops                      32     0.00      564,692   0.0057%  0.0481%    0.1x -0.029 negligible    avoided
 
-  Losses of Crops (total: 192,871 px = 19.29 km2, W_j = 1.4897%)
-  Target                 Pixels      km2   R_jk(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Rangeland              67,188     6.72  25.1621%  1.4897%   16.9x   TARGETED
-  Trees                  42,454     4.25  23.5065%  1.4897%   15.8x   TARGETED
-  Built Area             83,147     8.31  22.1416%  1.4897%   14.9x   TARGETED
-  Flooded Vegetation         82     0.01   1.4114%  1.4897%    0.9x    avoided
+  Losses of Crops (192,871 px = 19.29 km2, V_j = 1.4897%)
+    chi2=478671.87, df=4, p=0.00e+00
+  Target                 Pixels      km2         C_+k      Q_jk      V_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Rangeland              67,188     6.72      689,075   9.7505%  1.4897%    6.5x +0.390      small   TARGETED
+  Built Area             83,147     8.31    2,112,557   3.9358%  1.4897%    2.6x +0.155 negligible   TARGETED
+  Trees                  42,454     4.25   10,001,001   0.4245%  1.4897%    0.3x -0.114 negligible    avoided
+  Flooded Vegetation         82     0.01       32,303   0.2538%  1.4897%    0.2x -0.144 negligible    avoided
 
-  Losses of Built Area (total: 52,753 px = 5.28 km2, W_j = 0.4628%)
-  Target                 Pixels      km2   R_jk(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Bare Ground            15,581     1.56 100.0000%  0.4628%  216.1x   TARGETED
-  Trees                  15,591     1.56   8.6327%  0.4628%   18.7x   TARGETED
-  Crops                  13,228     1.32   6.8281%  0.4628%   14.8x   TARGETED
-  Rangeland               8,329     0.83   3.1192%  0.4628%    6.7x   TARGETED
-  Flooded Vegetation         24     0.00   0.4131%  0.4628%    0.9x    avoided
+  Losses of Built Area (52,753 px = 5.28 km2, V_j = 0.4628%)
+    chi2=510145.22, df=4, p=0.00e+00
+  Target                 Pixels      km2         C_+k      Q_jk      V_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Bare Ground            15,581     1.56      111,866  13.9283%  0.4628%   30.1x +0.629     medium   TARGETED
+  Crops                  13,228     1.32      564,692   2.3425%  0.4628%    5.1x +0.171 negligible   TARGETED
+  Rangeland               8,329     0.83      689,075   1.2087%  0.4628%    2.6x +0.084 negligible   TARGETED
+  Trees                  15,591     1.56   10,001,001   0.1559%  0.4628%    0.3x -0.057 negligible    avoided
+  Flooded Vegetation         24     0.00       32,303   0.0743%  0.4628%    0.2x -0.082 negligible    avoided
 
-  Losses of Bare Ground (total: 40,684 px = 4.07 km2, W_j = 0.3036%)
-  Target                 Pixels      km2   R_jk(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Built Area             25,770     2.58   6.8624%  0.3036%   22.6x   TARGETED
-  Crops                   6,369     0.64   3.2876%  0.3036%   10.8x   TARGETED
-  Rangeland               8,481     0.85   3.1762%  0.3036%   10.5x   TARGETED
-  Flooded Vegetation          3     0.00   0.0516%  0.3036%    0.2x    avoided
-  Trees                      61     0.01   0.0338%  0.3036%    0.1x    avoided
+  Losses of Bare Ground (40,684 px = 4.07 km2, V_j = 0.3036%)
+    chi2=120890.24, df=4, p=0.00e+00
+  Target                 Pixels      km2         C_+k      Q_jk      V_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Rangeland               8,481     0.85      689,075   1.2308%  0.3036%    4.1x +0.112 negligible   TARGETED
+  Built Area             25,770     2.58    2,112,557   1.2198%  0.3036%    4.0x +0.111 negligible   TARGETED
+  Crops                   6,369     0.64      564,692   1.1279%  0.3036%    3.7x +0.103 negligible   TARGETED
+  Flooded Vegetation          3     0.00       32,303   0.0093%  0.3036%    0.0x -0.091 negligible    avoided
+  Trees                      61     0.01   10,001,001   0.0006%  0.3036%    0.0x -0.105 negligible    avoided
 
-  Losses of Rangeland (total: 295,093 px = 29.51 km2, W_j = 2.3014%)
-  Target                 Pixels      km2   R_jk(%)   W_j(%)   Ratio     Status
-  -------------------------------------------------------------------------
-  Trees                 117,294    11.73  64.9450%  2.3014%   28.2x   TARGETED
-  Crops                  94,411     9.44  48.7338%  2.3014%   21.2x   TARGETED
-  Built Area             82,621     8.26  22.0015%  2.3014%    9.6x   TARGETED
-  Flooded Vegetation        767     0.08  13.2014%  2.3014%    5.7x   TARGETED
+  Losses of Rangeland (295,093 px = 29.51 km2, V_j = 2.3014%)
+    chi2=591753.02, df=4, p=0.00e+00
+  Target                 Pixels      km2         C_+k      Q_jk      V_j   Ratio       h        |h|     Status
+  ---------------------------------------------------------------------------------------------------------
+  Crops                  94,411     9.44      564,692  16.7190%  2.3014%    7.3x +0.538     medium   TARGETED
+  Built Area             82,621     8.26    2,112,557   3.9109%  2.3014%    1.7x +0.094 negligible   TARGETED
+  Flooded Vegetation        767     0.08       32,303   2.3744%  2.3014%    1.0x +0.005 negligible   TARGETED
+  Trees                 117,294    11.73   10,001,001   1.1728%  2.3014%    0.5x -0.088 negligible    avoided
 
-----------------------------------------------------------------------------
-  SECTION 5 -- SYNTHESIS AND KEY FINDINGS
-----------------------------------------------------------------------------
+------------------------------------------------------------------------------
+  SECTION 5 -- QUANTITY-EXCHANGE-SHIFT DECOMPOSITION
+------------------------------------------------------------------------------
 
-  This analysis independently characterises LULC transition dynamics
-  within the IMIP industrial zone without imposing any a priori
-  temporal structure from the marine optical (Kd490) analysis.
+  Pontius (2019), Int. J. Remote Sensing.
+  Q = |gain - loss|;  E = 2*SUM min(C_ij,C_ji);  S = 2*min(G,L) - E
+
+  Category                 Gain       Loss          Q          E          S      Total
+  ----------------------------------------------------------------------------------
+  Trees                 180,605    450,385    269,780    360,546        664    630,990
+  Flooded Vegetation      5,810      6,483        673     11,284        336     12,293
+  Crops                 193,728    192,871        857    245,804    139,938    386,599
+  Built Area            375,524     52,753    322,771    105,506          0    428,277
+  Bare Ground            15,581     40,684     25,103     31,162          0     56,265
+  Rangeland             267,021    295,093     28,072    386,926    147,116    562,114
+
+  Landscape totals (halved):
+    Quantity  :      323,628 px (   32.36 km2)  [31.2%]
+    Exchange  :      570,614 px (   57.06 km2)  [55.0%]
+    Shift     :      144,027 px (   14.40 km2)  [13.9%]
+    Total     :    1,038,269 px (  103.83 km2)         
+
+------------------------------------------------------------------------------
+  SECTION 6 -- PER-INTERVAL CATEGORY INTENSITY
+------------------------------------------------------------------------------
+
+  Gain intensity per interval (A=Active, d=dormant):
+
+  Interval        U(%)     Trees    Fl.Veg     Crops     Built      Bare     Range
+  --------------------------------------------------------------------------------
+  2017-2018      6.69%    1.65d   25.33A   35.06A   26.72A    3.96d   28.00A
+  2018-2019      7.16%    0.89d    4.08d   20.54A   23.11A   13.40A   45.12A
+  2019-2020      6.76%    2.11d   34.56A   39.13A   15.54A    5.98d   23.38A
+  2020-2021      7.40%    2.58d    3.31d   28.12A   13.98A   16.12A   38.40A
+  2021-2022     10.01%    1.72d   18.36A   46.51A   26.97A   20.32A   36.15A
+  2022-2023      9.50%    1.24d   13.60A   30.92A   21.22A   10.51A   57.13A
+  2023-2024      6.27%    2.49d   22.75A   35.11A    5.22d   31.02A   46.41A
+
+  Loss intensity per interval:
+  Interval        U(%)     Trees    Fl.Veg     Crops     Built      Bare     Range
+  --------------------------------------------------------------------------------
+  2017-2018      6.69%    2.96d    7.12A   27.92A    1.99d   47.50A   37.44A
+  2018-2019      7.16%    5.19d   28.25A   31.74A    2.53d   21.99A   23.09A
+  2019-2020      6.76%    3.49d    4.37d   20.27A    3.63d   18.94A   39.62A
+  2020-2021      7.40%    4.14d   13.47A   37.69A    4.32d   17.11A   32.57A
+  2021-2022     10.01%    6.10d   26.40A   35.48A    3.05d   27.82A   55.22A
+  2022-2023      9.50%    6.53d   36.00A   38.91A    1.27d   40.79A   55.28A
+  2023-2024      6.27%    2.21d   24.15A   43.12A    3.55d   18.15A   48.69A
+
+------------------------------------------------------------------------------
+  SECTION 7 -- PER-INTERVAL: TREES -> BUILT AREA
+  (A&P Eq. 8-9: R_ij = C_ij / C_i+, W_j = Gain_j / non-j START)
+------------------------------------------------------------------------------
+
+  Interval         Pixels      km2      R_ij      W_j   Ratio     Status
+  --------------------------------------------------------------------
+  2017-2018        18,984     1.90   1.2372%  2.4863%    0.5x    avoided
+  2018-2019        27,199     2.72   1.7212%  2.7233%    0.6x    avoided
+  2019-2020        20,358     2.04   1.3380%  2.1572%    0.6x    avoided
+  2020-2021        17,379     1.74   1.1634%  2.1556%    0.5x    avoided
+  2021-2022        51,805     5.18   3.5591%  5.5475%    0.6x    avoided
+  2022-2023        40,573     4.06   2.9313%  5.8625%    0.5x    avoided
+  2023-2024         7,094     0.71   0.5452%  1.6032%    0.3x    avoided
+
+------------------------------------------------------------------------------
+  SECTION 8 -- MARKOV STATIONARITY TEST
+------------------------------------------------------------------------------
+
+  Global: G=240369.59, df=180, p=0.00e+00
+  -> NON-STATIONARY
+
+  Class                         G    df            p         Result
+  -----------------------------------------------------------------
+  Trees                  94259.39    30     0.00e+00   NON-STATION.
+  Flooded Vegetation      5646.48    30     0.00e+00   NON-STATION.
+  Crops                  32119.48    30     0.00e+00   NON-STATION.
+  Built Area             14332.76    30     0.00e+00   NON-STATION.
+  Bare Ground            13558.06    30     0.00e+00   NON-STATION.
+  Rangeland              80453.40    30     0.00e+00   NON-STATION.
+
+------------------------------------------------------------------------------
+  SECTION 9 -- SYNTHESIS
+------------------------------------------------------------------------------
 
   FINDING 1: CONTINUOUS INTENSIVE TRANSFORMATION
-    All 7 intervals are Active, with intensities
-    ranging from 6.27% to 10.01%
-    (uniform threshold: 1.10%). The landscape underwent
-    sustained rapid change throughout 2017-2024, with peak intensity
-    in 2021–2022.
+    7/7 intervals Active.
+    S_t range: 6.27% to 10.01% (U_int=1.10%)
+    Chi-square: p < 0.001 -> non-uniform.
+    Peak: 2021-2022.
 
-  FINDING 2: DOMINANT TRANSITION -- FOREST TO INDUSTRIAL BUILT AREA
-    Trees -> Built Area: 183,392 pixels = 18.34 km2
-    Transition intensity: 40.72% (vs. uniform 3.20%)
-    Targeting ratio: 12.7x above random expectation
-    This is the single largest off-diagonal transition in the
-    aggregated matrix, confirming industrial expansion as the
-    primary driver of forest loss in the IMIP domain.
-
-  FINDING 3: BUILT AREA TRAJECTORY
+  FINDING 2: BUILT AREA EXPANSION
     Year    Pixels       km2
     2017      122,072      12.21
     2018      165,553      16.56
@@ -421,35 +495,64 @@
     2022      347,499      34.75
     2023      445,312      44.53
     2024      453,145      45.31
-    Expansion factor: 3.7x over 7 years
+    Expansion: 3.7x over 7 years
 
-  FINDING 4: CAUSAL CHAIN EVIDENCE
-    The three levels provide converging terrestrial evidence:
-    (a) Interval: Continuous intensive LULC change (no dormant
-        intervals) throughout the study period.
-    (b) Category: Built Area gain is disproportionately active;
-        Trees is the largest absolute contributor to landscape change.
-    (c) Transition: Forest-to-built conversion is statistically
-        targeted at 12.7x the random expectation.
+  FINDING 3: TRANSITION TARGETING (A&P gain perspective, Eq. 8-9)
+    Built Area sources (W_j = 3.2037%):
+      Bare Ground        R=18.8145%  5.9x  h=+0.537 (medium)  TARGETED
+      Crops              R=14.7467%  4.6x  h=+0.428 (small)  TARGETED
+      Rangeland          R=11.5208%  3.6x  h=+0.333 (small)  TARGETED
+      Flooded Vegetation R=1.8013%  0.6x  h=-0.091 (negligible)  avoided
+      Trees              R=1.7856%  0.6x  h=-0.092 (negligible)  avoided
 
-    The absence of a sharp terrestrial breakpoint, combined with
-    the identification of a marine structural break at May 2019
-    (from independent BSTS/changepoint analysis of Kd490),
-    suggests that cumulative land disturbance progressively
-    degraded coastal water quality until a threshold response
-    was triggered in the marine system -- consistent with
-    nonlinear sediment loading dynamics rather than a single
-    acute disturbance event.
+    Trees is AVOIDED as source for Built Area gain
+    (1.7856% vs W=3.2037%, ratio=0.6x).
+    Despite providing largest absolute flow (183,392 px = 18.34 km2),
+    it is below the uniform threshold because Trees
+    dominates the landscape (C_i+ >> other categories).
 
-  METHODOLOGICAL NOTES
-    - LULC product: Sentinel-2 10m annual composites
-      (Google Dynamic World / ESA WorldCover).
-    - Global ML product; regional classification accuracy for
-      tropical coastal Indonesia is unvalidated.
-    - Cloud-contaminated and no-data pixels excluded per interval.
-    - Water (class 1, >58%) excluded to prevent dilution.
-    - Reference: Aldwaik & Pontius (2012), Land Use Policy 29(1).
+    Loss perspective (A&P Eq. 12-13):
+      Trees -> Built: Q_jk=8.6810% vs V_j=12.8297% (0.7x, avoided)
 
-============================================================================
+  FINDING 4: CHANGE COMPOSITION
+    Q=31.2%, E=55.0%, S=13.9% (dominant: Exchange)
+    High exchange (55%) indicates substantial paired swapping
+    between categories (Trees-Rangeland, Crops-Rangeland).
+    Non-zero shift (13.9%) indicates allocative change beyond
+    simple pairwise exchange.
+
+  FINDING 5: NON-STATIONARITY
+    G=240369.59, p=0.00e+00 -> NON-STATIONARY
+    Transition dynamics evolved over the study period.
+    Non-stationary: Trees, Flooded Vegetation, Crops, Built Area, Bare Ground, Rangeland
+
+  FINDING 6: CAUSAL CHAIN EVIDENCE
+    (a) Interval: 7/7 Active (chi-square confirmed)
+    (b) Category: Built gain Active; Trees gain Dormant
+    (c) Transition: Trees > Built avoided at 0.6x
+        (h = -0.092, negligible)
+        Absolute: 183,392 px = 18.34 km2
+    (d) Q-E-S: Exchange dominates (55%)
+    (e) Markov: Non-stationary
+
+    Two-stage deforestation cascade:
+    Trees degrade to Rangeland/Crops (high exchange), then
+    Crops/Bare Ground convert to Built Area (targeted).
+    Cumulative land disturbance progressively degraded
+    coastal water quality until the marine threshold
+    (May 2019 BSTS/changepoint Kd490), consistent with
+    nonlinear sediment loading.
+
+  METHODS
+    - Sentinel-2 10m composites (Dynamic World / ESA WorldCover)
+    - Water (>58%), Clouds, no-data excluded per interval
+    - Intensity: Aldwaik & Pontius (2012), Land Use Policy 29(1)
+    - Q-E-S: Pontius (2019), Int. J. Remote Sensing
+    - Wilson CI: Wilson (1927), JASA 22(158)
+    - Chi-square: Pearson's goodness-of-fit
+    - Markov: Likelihood-ratio G-test
+    - Effect size: Cohen's h for proportions
+
+==============================================================================
   END OF REPORT
-============================================================================
+==============================================================================
