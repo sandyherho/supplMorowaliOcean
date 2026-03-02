@@ -2,7 +2,7 @@
   Sentinel-2 Annual LULC — Class Percentage Report
   IMIP Impact Zone, Morowali, Central Sulawesi, Indonesia
   Spatial extent : Lon [122.08, 122.28]  Lat [-2.92, -2.72]
-  Generated      : 2026-02-28 22:52:45
+  Generated      : 2026-03-02 20:53:26
 ========================================================================
 
   Notes:
