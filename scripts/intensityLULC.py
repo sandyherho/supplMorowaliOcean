@@ -19,6 +19,9 @@
   Output : ../figs/intensity_analysis.{pdf,png}
            ../reports/intensity_analysis_report.txt
 
+  FIGURE STYLE: Publication-quality (enlarged fonts, bold
+  labels, larger figure, high-visibility legend).
+
   Author : Sandy H. S. Herho
   License: MIT
 ================================================================
@@ -66,19 +69,27 @@ SHORT = {2: "Trees", 4: "Fl.Veg", 5: "Crops",
 ALL_CODES  = sorted(CLASS_INFO.keys())
 LAND_CODES = [c for c in ALL_CODES if c not in (1, 10)]
 
-# ── Plot style ────────────────────────────────────────────────
+# ── Publication-quality plot style ────────────────────────────
 plt.rcParams.update({
     "font.family":       "serif",
     "font.serif":        ["STIXGeneral", "DejaVu Serif"],
     "mathtext.fontset":  "stix",
-    "font.size":         9,
-    "axes.linewidth":    0.6,
+    "font.size":         12,
+    "axes.linewidth":    0.8,
+    "axes.labelsize":    13,
+    "axes.labelweight":  "bold",
+    "axes.titlesize":    14,
+    "axes.titleweight":  "bold",
     "xtick.direction":   "out",
     "ytick.direction":   "out",
-    "xtick.major.width": 0.5,
-    "ytick.major.width": 0.5,
-    "xtick.major.size":  3,
-    "ytick.major.size":  3,
+    "xtick.labelsize":   11,
+    "ytick.labelsize":   11,
+    "xtick.major.width": 0.8,
+    "ytick.major.width": 0.8,
+    "xtick.major.size":  5,
+    "ytick.major.size":  5,
+    "legend.fontsize":   10,
+    "legend.framealpha":  0.95,
 })
 C_ACTIVE  = "#C62828"
 C_DORMANT = "#90A4AE"
@@ -187,11 +198,6 @@ def agg_matrices(tm_list, codes):
 # ==============================================================
 
 def level1_interval(tm_list, years, codes):
-    """
-    S_t = (changed_t / total_t) x 100 / duration_t
-    U_int = (sum_changed / sum_total) x 100 / total_years
-    Chi-square H0: change ~ pixels x duration per interval.
-    """
     nI = len(tm_list)
     changed_v, total_v, dur_v = [], [], []
     for t in range(nI):
@@ -207,7 +213,6 @@ def level1_interval(tm_list, years, codes):
     total_dur = int(years[-1] - years[0])
     U = (sum_c / sum_t * 100.0) / total_dur if sum_t > 0 else 0.0
 
-    # Expected under uniformity: proportional to pixels x duration
     weights = np.array([total_v[t] * dur_v[t] for t in range(nI)],
                        dtype=np.float64)
     weights /= weights.sum()
@@ -238,12 +243,6 @@ def level1_interval(tm_list, years, codes):
 # ==============================================================
 
 def level2_category(tm_list, codes):
-    """
-    G_j = gain_j / end_size_j x 100
-    L_j = loss_j / start_size_j x 100
-    U_cat = total_change / total_landscape x 100
-    Chi-square H0: gain (loss) ~ end (start) size.
-    """
     agg = agg_matrices(tm_list, codes)
     n = len(codes)
     T = agg.sum()
@@ -255,8 +254,8 @@ def level2_category(tm_list, codes):
     starts, ends = [], []
 
     for ci, c in enumerate(codes):
-        start_c = int(agg[ci, :].sum())   # row sum
-        end_c   = int(agg[:, ci].sum())    # col sum
+        start_c = int(agg[ci, :].sum())
+        end_c   = int(agg[:, ci].sum())
         gain_c  = end_c - int(agg[ci, ci])
         loss_c  = start_c - int(agg[ci, ci])
         G_j = (gain_c / end_c * 100.0) if end_c > 0 else 0.0
@@ -276,7 +275,6 @@ def level2_category(tm_list, codes):
         starts.append(start_c)
         ends.append(end_c)
 
-    # Chi-square: gain expected ~ end_size, loss expected ~ start_size
     ga = np.array(gains, dtype=np.float64)
     la = np.array(losses, dtype=np.float64)
     ea = np.array(ends, dtype=np.float64)
@@ -297,37 +295,19 @@ def level2_category(tm_list, codes):
 
 # ==============================================================
 #  5. LEVEL 3 -- TRANSITION INTENSITY
-#     Aldwaik & Pontius (2012) Equations 8-9, 12-13
-# ==============================================================
-#
-#  GAIN of category j:
-#    R_ij = C_ij / C_i+     (Eq. 8)
-#      C_ij = pixels transitioning from i to j
-#      C_i+ = row sum = START size of category i
-#    W_j  = Gain_j / SUM_{i!=j} C_i+     (Eq. 9)
-#      = total gain of j / total non-j START landscape
-#    Targeted: R_ij > W_j
-#
-#  LOSS of category j:
-#    Q_jk = C_jk / C_+k     (Eq. 12)
-#      C_jk = pixels transitioning from j to k
-#      C_+k = col sum = END size of category k
-#    V_j  = Loss_j / SUM_{k!=j} C_+k     (Eq. 13)
-#      = total loss of j / total non-j END landscape
-#    Targeted: Q_jk > V_j
 # ==============================================================
 
 def level3_transition(tm_list, codes):
     agg = agg_matrices(tm_list, codes)
     n = len(codes)
-    rs = agg.sum(axis=1)   # row sums = start sizes (C_i+)
-    cs = agg.sum(axis=0)   # col sums = end sizes   (C_+k)
+    rs = agg.sum(axis=1)
+    cs = agg.sum(axis=0)
 
     gain_res, loss_res = {}, {}
     gain_chi2, loss_chi2 = {}, {}
 
     for ji, j in enumerate(codes):
-        # ── GAIN perspective (Eq. 8-9) ────────────────────────
+        # GAIN perspective
         gain_j = int(cs[ji]) - int(agg[ji, ji])
         non_j_start = sum(int(rs[ii]) for ii in range(n) if ii != ji)
         W_j = (gain_j / non_j_start * 100.0) if non_j_start > 0 else 0.0
@@ -352,7 +332,6 @@ def level3_transition(tm_list, codes):
             obs_g.append(C_ij)
             denom_g.append(C_iplus)
 
-        # Chi-square: H0 sources proportional to start sizes
         dg = np.array(denom_g, dtype=np.float64)
         og = np.array(obs_g, dtype=np.float64)
         eg = (dg / dg.sum()) * gain_j if dg.sum() > 0 else np.ones_like(dg)
@@ -363,7 +342,7 @@ def level3_transition(tm_list, codes):
         gain_res[j] = sources
         gain_chi2[j] = dict(chi2=c2, df=df, p=pv, W=W_j)
 
-        # ── LOSS perspective (Eq. 12-13) ──────────────────────
+        # LOSS perspective
         loss_j = int(rs[ji]) - int(agg[ji, ji])
         non_j_end = sum(int(cs[ki]) for ki in range(n) if ki != ji)
         V_j = (loss_j / non_j_end * 100.0) if non_j_end > 0 else 0.0
@@ -402,17 +381,10 @@ def level3_transition(tm_list, codes):
 
 
 # ==============================================================
-#  6. Q-E-S DECOMPOSITION (Pontius 2019)
+#  6. Q-E-S DECOMPOSITION
 # ==============================================================
 
 def qes_decomposition(agg, codes):
-    """
-    Per category j:
-      Q_j = |gain_j - loss_j|
-      E_j = 2 * SUM_{i!=j} min(C_ij, C_ji)    (pairwise swaps)
-      S_j = 2 * min(gain_j, loss_j) - E_j      (residual)
-    Landscape totals halved to avoid double-counting.
-    """
     n = len(codes)
     rows = []
     tQ, tE, tS, tT = 0, 0, 0, 0
@@ -429,7 +401,6 @@ def qes_decomposition(agg, codes):
                          gain=g, loss=l, Q=Q_j, E=E_j, S=S_j, T=T_j))
         tQ += Q_j; tE += E_j; tS += S_j; tT += T_j
 
-    # Halve for landscape-level (each change counted in two categories)
     summary = dict(Q=tQ / 2.0, E=tE / 2.0, S=tS / 2.0, T=tT / 2.0)
     return rows, summary
 
@@ -439,7 +410,6 @@ def qes_decomposition(agg, codes):
 # ==============================================================
 
 def per_interval_cat(tm_list, years, codes):
-    """Category gain/loss intensity per interval."""
     out = []
     for t, tm in enumerate(tm_list):
         a = tm2arr(tm, codes)
@@ -461,15 +431,14 @@ def per_interval_cat(tm_list, years, codes):
 
 
 def per_interval_trans(tm_list, years, codes, tgt=7, src=2):
-    """Per-interval Trees->Built using A&P Eq. 8-9."""
     ti = codes.index(tgt)
     si = codes.index(src)
     out = []
     for t, tm in enumerate(tm_list):
         a = tm2arr(tm, codes)
-        C_st = int(a[si, ti])                              # Trees->Built
-        C_splus = int(a[si, :].sum())                      # Trees start
-        gain_t = int(a[:, ti].sum()) - int(a[ti, ti])      # Built gain
+        C_st = int(a[si, ti])
+        C_splus = int(a[si, :].sum())
+        gain_t = int(a[:, ti].sum()) - int(a[ti, ti])
         non_t_start = sum(int(a[ii, :].sum())
                           for ii in range(len(codes)) if ii != ti)
         R = (C_st / C_splus * 100.0) if C_splus > 0 else 0.0
@@ -484,20 +453,14 @@ def per_interval_trans(tm_list, years, codes, tgt=7, src=2):
 
 
 # ==============================================================
-#  8. MARKOV STATIONARITY (likelihood-ratio G-test)
+#  8. MARKOV STATIONARITY
 # ==============================================================
 
 def markov_test(tm_list, codes):
-    """
-    H0: Transition probability matrix is constant across intervals.
-    G = 2 * SUM_t SUM_i SUM_j  n_{ij}^{(t)} * ln( p_{ij}^{(t)} / p_{ij} )
-    df = (T - 1) * n * (n - 1)
-    """
     nT = len(tm_list)
     n = len(codes)
     agg = agg_matrices(tm_list, codes)
 
-    # Pooled transition probabilities
     P = np.zeros((n, n), dtype=np.float64)
     for i in range(n):
         rs = agg[i, :].sum()
@@ -521,7 +484,6 @@ def markov_test(tm_list, codes):
     df = (nT - 1) * n * (n - 1)
     pv = 1.0 - sp_stats.chi2.cdf(G, df) if df > 0 else 1.0
 
-    # Per-class
     pc = {}
     for ci, c in enumerate(codes):
         Gc = 0.0
@@ -547,20 +509,19 @@ def markov_test(tm_list, codes):
 
 
 # ==============================================================
-#  9. FIGURE
+#  9. FIGURE — Publication-quality
 # ==============================================================
 
 def make_figure(L1, U1, L2, U2, G3, L3, figdir):
 
-    fig = plt.figure(figsize=(14, 6.6))
+    fig = plt.figure(figsize=(17, 8.0))
 
-    # Main panels occupy the top; legend lives below via fig.legend
     gs = fig.add_gridspec(
         nrows=1, ncols=3,
         width_ratios=[1, 1.15, 1.3],
-        wspace=0.40,
-        left=0.065, right=0.96,
-        top=0.92, bottom=0.16,
+        wspace=0.42,
+        left=0.055, right=0.95,
+        top=0.91, bottom=0.14,
     )
 
     # ── Panel (a) ─────────────────────────────────────────────
@@ -571,14 +532,17 @@ def make_figure(L1, U1, L2, U2, G3, L3, figdir):
     yp = np.arange(len(labs))
     ax_a.barh(yp, vals, color=cols, height=0.55,
               edgecolor="white", linewidth=0.4, zorder=3)
-    ax_a.axvline(U1, color=C_THRESH, ls="--", lw=1.3, zorder=4)
+    ax_a.axvline(U1, color=C_THRESH, ls="--", lw=1.5, zorder=4)
     ax_a.set_yticks(yp)
-    ax_a.set_yticklabels(labs, fontsize=8.5)
-    ax_a.set_xlabel("Annual change intensity (%)", fontsize=9)
+    ax_a.set_yticklabels(labs, fontsize=10, fontweight="bold")
+    ax_a.set_xlabel("Annual change intensity (%)", fontsize=13,
+                    fontweight="bold")
     ax_a.invert_yaxis()
-    ax_a.set_title("(a)", fontsize=11, fontweight="bold", loc="center", pad=10)
+    ax_a.set_title(r"$\mathbf{(a)}$", fontsize=14, fontweight="bold",
+                   loc="center", pad=12)
     ax_a.spines["top"].set_visible(False)
     ax_a.spines["right"].set_visible(False)
+    ax_a.tick_params(axis="x", labelsize=11)
     ax_a.grid(axis="x", ls=":", alpha=0.3, zorder=0)
 
     # ── Panel (b) ─────────────────────────────────────────────
@@ -593,26 +557,28 @@ def make_figure(L1, U1, L2, U2, G3, L3, figdir):
               color=gc, edgecolor="white", linewidth=0.4, zorder=3)
     ax_b.barh(yp_b + bh / 2, [-r["li"] for r in cl], height=bh,
               color=lc, edgecolor="white", linewidth=0.4, zorder=3)
-    ax_b.axvline( U2, color=C_THRESH, ls="--", lw=1.2, zorder=4)
-    ax_b.axvline(-U2, color=C_THRESH, ls="--", lw=1.2, zorder=4)
+    ax_b.axvline( U2, color=C_THRESH, ls="--", lw=1.4, zorder=4)
+    ax_b.axvline(-U2, color=C_THRESH, ls="--", lw=1.4, zorder=4)
     ax_b.axvline(0, color="black", lw=0.6, zorder=2)
     ax_b.set_yticks(yp_b)
-    ax_b.set_yticklabels([r["name"] for r in cl], fontsize=8.5)
-    ax_b.set_xlabel("Category intensity (%)   Loss  |  Gain", fontsize=9)
+    ax_b.set_yticklabels([r["name"] for r in cl], fontsize=10,
+                         fontweight="bold")
+    ax_b.set_xlabel("Category intensity (%)   Loss  |  Gain", fontsize=13,
+                    fontweight="bold")
     ax_b.invert_yaxis()
-    ax_b.set_title("(b)", fontsize=11, fontweight="bold", loc="center", pad=10)
+    ax_b.set_title(r"$\mathbf{(b)}$", fontsize=14, fontweight="bold",
+                   loc="center", pad=12)
     ax_b.spines["top"].set_visible(False)
     ax_b.spines["right"].set_visible(False)
+    ax_b.tick_params(axis="x", labelsize=11)
     ax_b.grid(axis="x", ls=":", alpha=0.3, zorder=0)
 
     # ── Panel (c) ─────────────────────────────────────────────
     ax_c = fig.add_subplot(gs[0, 2])
 
-    # Built Area gain sources
     bs = sorted([s for s in G3.get(7, [])
                  if s["source_code"] in LAND_CODES and s["pixels"] > 0],
                 key=lambda x: x["intensity"], reverse=True)
-    # Trees loss sinks, EXCLUDING Built (already shown above)
     ts = sorted([s for s in L3.get(2, [])
                  if s["target_code"] in LAND_CODES
                  and s["target_code"] != 7
@@ -635,21 +601,18 @@ def make_figure(L1, U1, L2, U2, G3, L3, figdir):
     ax_c.barh(yp_c, items, color=colors, height=0.52,
               edgecolor="white", linewidth=0.4, zorder=3)
 
-    # Uniform threshold lines
     if bs:
         W_built = bs[0]["uniform"]
-        ax_c.axvline(W_built, color=C_THRESH, ls="--", lw=1.0,
+        ax_c.axvline(W_built, color=C_THRESH, ls="--", lw=1.2,
                      zorder=4, alpha=0.7)
     if ts:
         V_trees = ts[0]["uniform"]
-        # Only draw second line if substantially different
         if abs(V_trees - W_built) > 0.3:
-            ax_c.axvline(V_trees, color=C_THRESH, ls=":", lw=1.0,
+            ax_c.axvline(V_trees, color=C_THRESH, ls=":", lw=1.2,
                          zorder=4, alpha=0.6)
 
     ax_c.invert_yaxis()
 
-    # Section separator and annotations
     if sep < ni:
         ax_c.axhline(sep - 0.5, color="#455A64", ls="-", lw=0.7, zorder=5)
         mid_top = (sep - 1) / 2.0
@@ -657,37 +620,42 @@ def make_figure(L1, U1, L2, U2, G3, L3, figdir):
         ax_c.annotate("Built Area\ngain sources",
                        xy=(1.02, mid_top),
                        xycoords=("axes fraction", "data"),
-                       fontsize=7, fontstyle="italic", color="#455A64",
+                       fontsize=9, fontstyle="italic", color="#455A64",
+                       fontweight="bold",
                        va="center", ha="left", annotation_clip=False)
         ax_c.annotate("Trees\nloss sinks",
                        xy=(1.02, mid_bot),
                        xycoords=("axes fraction", "data"),
-                       fontsize=7, fontstyle="italic", color="#455A64",
+                       fontsize=9, fontstyle="italic", color="#455A64",
+                       fontweight="bold",
                        va="center", ha="left", annotation_clip=False)
 
     ax_c.set_yticks(yp_c)
-    ax_c.set_yticklabels(labels, fontsize=8)
-    ax_c.set_xlabel("Transition intensity (%)", fontsize=9)
-    ax_c.set_title("(c)", fontsize=11, fontweight="bold", loc="center", pad=10)
+    ax_c.set_yticklabels(labels, fontsize=10, fontweight="bold")
+    ax_c.set_xlabel("Transition intensity (%)", fontsize=13,
+                    fontweight="bold")
+    ax_c.set_title(r"$\mathbf{(c)}$", fontsize=14, fontweight="bold",
+                   loc="center", pad=12)
     ax_c.spines["top"].set_visible(False)
     ax_c.spines["right"].set_visible(False)
+    ax_c.tick_params(axis="x", labelsize=11)
     ax_c.grid(axis="x", ls=":", alpha=0.3, zorder=0)
 
-    # ── Legend -- detached at bottom of figure ─────────────────
+    # ── Legend ─────────────────────────────────────────────────
     handles = [
         Patch(facecolor=C_ACTIVE,  edgecolor="white", lw=0.4,
               label="Active / Targeted  (observed > uniform)"),
         Patch(facecolor=C_DORMANT, edgecolor="white", lw=0.4,
               label=r"Dormant / Avoided  (observed $\leq$ uniform)"),
-        Line2D([], [], color=C_THRESH, ls="--", lw=1.3,
+        Line2D([], [], color=C_THRESH, ls="--", lw=1.5,
                label="Uniform threshold"),
     ]
     fig.legend(
         handles=handles,
         loc="lower center",
-        bbox_to_anchor=(0.5, 0.015),
-        ncol=3, fontsize=9, frameon=False,
-        columnspacing=3.0, handlelength=2.0, handletextpad=0.7,
+        bbox_to_anchor=(0.5, 0.005),
+        ncol=3, fontsize=11, frameon=False,
+        columnspacing=3.0, handlelength=2.2, handletextpad=0.8,
     )
 
     for fmt in ("pdf", "png"):
@@ -731,7 +699,6 @@ def write_report(years, tm_list, nv_list,
     w(f"  CI          : Wilson score, alpha = {ALPHA}")
     w(SEP)
 
-    # ── Notation ──────────────────────────────────────────────
     w("")
     w(SEP2)
     w("  NOTATION")
@@ -762,7 +729,7 @@ def write_report(years, tm_list, nv_list,
     w("  Active   = observed > uniform;  Dormant = observed <= uniform")
     w("")
 
-    # ── S1: Transition Matrices ───────────────────────────────
+    # S1: Transition Matrices
     w(SEP2)
     w("  SECTION 1 -- TRANSITION MATRICES")
     w(SEP2)
@@ -803,7 +770,7 @@ def write_report(years, tm_list, nv_list,
               f"{l:>10,} {l*PX_KM2:>10.2f} {g-l:>+10,} {2*min(g,l):>10,}")
         w("")
 
-    # ── S2: Level 1 ───────────────────────────────────────────
+    # S2: Level 1
     w(SEP2)
     w("  SECTION 2 -- LEVEL 1: INTERVAL INTENSITY")
     w(SEP2)
@@ -838,7 +805,7 @@ def write_report(years, tm_list, nv_list,
     w(f"  Peak  : {mx['interval']} ({mx['S']:.4f}%, {mx['S']/U1:.1f}x)")
     w(f"  Lowest: {mn['interval']} ({mn['S']:.4f}%, {mn['S']/U1:.1f}x)")
 
-    # ── S3: Level 2 ───────────────────────────────────────────
+    # S3: Level 2
     w("")
     w(SEP2)
     w("  SECTION 3 -- LEVEL 2: CATEGORY INTENSITY")
@@ -871,7 +838,7 @@ def write_report(years, tm_list, nv_list,
     w(f"  Active loss : {', '.join(r['name'] for r in cl if r['la'])}")
     w(f"  Dormant loss: {', '.join(r['name'] for r in cl if not r['la'])}")
 
-    # ── S4: Level 3 ───────────────────────────────────────────
+    # S4: Level 3
     w("")
     w(SEP2)
     w("  SECTION 4 -- LEVEL 3: TRANSITION INTENSITY")
@@ -937,7 +904,7 @@ def write_report(years, tm_list, nv_list,
               f"{r:>6.1f}x {s['h']:>+6.3f} {h_label(s['h']):>10} "
               f"{st:>10}")
 
-    # ── S5: Q-E-S ─────────────────────────────────────────────
+    # S5: Q-E-S
     w("")
     w(SEP2)
     w("  SECTION 5 -- QUANTITY-EXCHANGE-SHIFT DECOMPOSITION")
@@ -962,7 +929,7 @@ def write_report(years, tm_list, nv_list,
         ps = f"[{pct:.1f}%]" if k != "T" else ""
         w(f"    {lab:<10}: {v:>12,.0f} px ({v*PX_KM2:>8.2f} km2) {ps:>8}")
 
-    # ── S6: Per-interval category ─────────────────────────────
+    # S6: Per-interval category
     w("")
     w(SEP2)
     w("  SECTION 6 -- PER-INTERVAL CATEGORY INTENSITY")
@@ -994,7 +961,7 @@ def write_report(years, tm_list, nv_list,
             row += f"  {d['li']:>6.2f}{flag}"
         w(row)
 
-    # ── S7: Per-interval Trees->Built ─────────────────────────
+    # S7: Per-interval Trees->Built
     w("")
     w(SEP2)
     w("  SECTION 7 -- PER-INTERVAL: TREES -> BUILT AREA")
@@ -1010,7 +977,7 @@ def write_report(years, tm_list, nv_list,
           f"{r['km2']:>8.2f} {r['R']:>8.4f}% "
           f"{r['W']:>7.4f}% {r['ratio']:>6.1f}x {st:>10}")
 
-    # ── S8: Markov ────────────────────────────────────────────
+    # S8: Markov
     w("")
     w(SEP2)
     w("  SECTION 8 -- MARKOV STATIONARITY TEST")
@@ -1028,14 +995,13 @@ def write_report(years, tm_list, nv_list,
         w(f"  {CLASS_INFO[c][0]:<18} {pc['G']:>12.2f} {pc['df']:>5} "
           f"{pc['p']:>12.2e} {res:>14}")
 
-    # ── S9: Synthesis ─────────────────────────────────────────
+    # S9: Synthesis
     w("")
     w(SEP2)
     w("  SECTION 9 -- SYNTHESIS")
     w(SEP2)
     w("")
 
-    # Built trajectory
     bsizes = []
     for t, tm in enumerate(tm_list):
         a = tm2arr(tm, LAND_CODES)
@@ -1044,7 +1010,6 @@ def write_report(years, tm_list, nv_list,
     alast = tm2arr(tm_list[-1], LAND_CODES)
     bsizes.append(int(alast[:, LAND_CODES.index(7)].sum()))
 
-    # Key transitions
     tb = next((s for s in G3.get(7, []) if s["source_code"] == 2), None)
     bb = next((s for s in G3.get(7, []) if s["source_code"] == 8), None)
     cb = next((s for s in G3.get(7, []) if s["source_code"] == 5), None)
@@ -1077,7 +1042,6 @@ def write_report(years, tm_list, nv_list,
         w(f"      {s['source_name']:<18} R={s['intensity']:.4f}%  "
           f"{r:.1f}x  h={s['h']:+.3f} ({h_label(s['h'])})  {st}")
     w("")
-    # Interpret
     if tb:
         if tb["active"]:
             w(f"    Trees is TARGETED as source for Built Area gain")
@@ -1093,7 +1057,6 @@ def write_report(years, tm_list, nv_list,
             w(f"    dominates the landscape (C_i+ >> other categories).")
     w("")
 
-    # Loss perspective note for Trees->Built
     tb_loss = next((s for s in L3.get(2, []) if s["target_code"] == 7), None)
     if tb_loss:
         V_trees = lchi3.get(2, {}).get("W", 0)
@@ -1108,7 +1071,6 @@ def write_report(years, tm_list, nv_list,
             w(f"      the two perspectives use different denominators.")
     w("")
 
-    # Q-E-S
     qp = qes_s["Q"] / qes_s["T"] * 100.0 if qes_s["T"] > 0 else 0.0
     ep = qes_s["E"] / qes_s["T"] * 100.0 if qes_s["T"] > 0 else 0.0
     sp = qes_s["S"] / qes_s["T"] * 100.0 if qes_s["T"] > 0 else 0.0

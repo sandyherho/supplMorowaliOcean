@@ -15,6 +15,9 @@ Methodology:
   7. Autocorrelation-aware effective sample size
   8. Control vs impact comparison with DiD
 
+FIGURE STYLE: Publication-quality (enlarged fonts, bold
+labels, larger figures, high-visibility legends).
+
 Author : Sandy H. S. Herho
 Date   : 2025/02/22
 License: MIT
@@ -64,6 +67,31 @@ DPI = 400
 np.random.seed(RANDOM_SEED)
 os.makedirs(FIG_DIR, exist_ok=True)
 os.makedirs(REPORT_DIR, exist_ok=True)
+
+# ── Publication-quality plot style ────────────────────────────────
+plt.rcParams.update({
+    "font.family":       "serif",
+    "font.size":         12,
+    "axes.linewidth":    0.8,
+    "axes.labelsize":    13,
+    "axes.labelweight":  "bold",
+    "axes.titlesize":    14,
+    "axes.titleweight":  "bold",
+    "xtick.labelsize":   11,
+    "ytick.labelsize":   11,
+    "xtick.direction":   "in",
+    "ytick.direction":   "in",
+    "xtick.major.width": 0.8,
+    "ytick.major.width": 0.8,
+    "xtick.major.size":  5,
+    "ytick.major.size":  5,
+    "xtick.minor.width": 0.5,
+    "ytick.minor.width": 0.5,
+    "xtick.minor.size":  3,
+    "ytick.minor.size":  3,
+    "legend.fontsize":   10,
+    "legend.framealpha":  0.95,
+})
 
 
 # ============================================================
@@ -382,59 +410,62 @@ def analyze_zone(ts_df, label):
 
 
 # ============================================================
-# 9. PLOTTING
+# 9. PLOTTING — Publication-quality
 # ============================================================
 def plot_penalty_bic_2x2(res_impact, res_control):
     """Figure 1: 2x2 — (a) penalty impact, (b) BIC impact,
                         (c) penalty control, (d) BIC control."""
-    fig, axes = plt.subplots(2, 2, figsize=(10, 8), dpi=DPI)
+    fig, axes = plt.subplots(2, 2, figsize=(13, 10), dpi=DPI)
 
     panels = [
-        (axes[0, 0], "(a)", res_impact, "penalty"),
-        (axes[0, 1], "(b)", res_impact, "bic"),
-        (axes[1, 0], "(c)", res_control, "penalty"),
-        (axes[1, 1], "(d)", res_control, "bic"),
+        (axes[0, 0], r"$\mathbf{(a)}$", res_impact, "penalty"),
+        (axes[0, 1], r"$\mathbf{(b)}$", res_impact, "bic"),
+        (axes[1, 0], r"$\mathbf{(c)}$", res_control, "penalty"),
+        (axes[1, 1], r"$\mathbf{(d)}$", res_control, "bic"),
     ]
 
     for ax, subtitle, res, ptype in panels:
         if ptype == "penalty":
             ax.plot(PENALTY_RANGE, res["n_bkps_array"], "o-", color="#2c3e50",
-                    markersize=2.5, linewidth=1.0, markeredgecolor="none")
+                    markersize=3.5, linewidth=1.2, markeredgecolor="none")
             ax.axvline(res["optimal_pen"], color="#c0392b", linestyle="--",
-                       linewidth=1.5)
+                       linewidth=1.8)
             ymin_v = min(res["n_bkps_array"])
             ymax_v = max(res["n_bkps_array"])
             yrange = ymax_v - ymin_v if ymax_v > ymin_v else 1
             ax.text(res["optimal_pen"] + 1.0,
                     ymin_v + 0.65 * yrange,
                     f"Optimal = {res['optimal_pen']}", color="#c0392b",
-                    fontsize=8, fontweight="bold", va="center")
-            ax.set_xlabel("Penalty parameter", fontsize=10)
-            ax.set_ylabel("Number of breakpoints", fontsize=10)
+                    fontsize=10, fontweight="bold", va="center")
+            ax.set_xlabel("Penalty parameter", fontsize=13,
+                          fontweight="bold")
+            ax.set_ylabel("Number of breakpoints", fontsize=13,
+                          fontweight="bold")
         else:
             ks = range(len(res["bic_scores"]))
             ax.plot(ks, res["bic_scores"], "s-", color="#2c3e50",
-                    markersize=4, linewidth=1.0, markeredgecolor="none")
+                    markersize=5, linewidth=1.2, markeredgecolor="none")
             ax.axvline(res["optimal_k"], color="#c0392b", linestyle="--",
-                       linewidth=1.5)
+                       linewidth=1.8)
             bic_min = min(res["bic_scores"])
             bic_max = max(res["bic_scores"])
             bic_range = bic_max - bic_min if bic_max > bic_min else 1
             ax.text(res["optimal_k"] + 0.3,
                     bic_min + 0.15 * bic_range,
                     f"Optimal $k$ = {res['optimal_k']}", color="#c0392b",
-                    fontsize=8, fontweight="bold", va="center")
-            ax.set_xlabel("Number of breakpoints ($k$)", fontsize=10)
-            ax.set_ylabel("BIC", fontsize=10)
+                    fontsize=10, fontweight="bold", va="center")
+            ax.set_xlabel("Number of breakpoints ($k$)", fontsize=13,
+                          fontweight="bold")
+            ax.set_ylabel("BIC", fontsize=13, fontweight="bold")
             ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
 
-        ax.text(-0.10, 1.04, subtitle, transform=ax.transAxes,
-                fontsize=13, fontweight="bold", va="bottom")
+        ax.text(-0.10, 1.05, subtitle, transform=ax.transAxes,
+                fontsize=15, fontweight="bold", va="bottom")
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.tick_params(labelsize=9)
+        ax.tick_params(labelsize=11, width=0.8, length=5)
 
-    plt.tight_layout()
+    plt.tight_layout(pad=2.0)
     fig.savefig(os.path.join(FIG_DIR, "penalty_bic.png"),
                 dpi=DPI, bbox_inches="tight")
     fig.savefig(os.path.join(FIG_DIR, "penalty_bic.pdf"),
@@ -451,7 +482,7 @@ def _plot_single_consensus(ax, res, palette, subtitle):
     bootstrap_results = res["bootstrap_results"]
 
     # Raw signal
-    ax.plot(ts_df.index, signal, color="#95a5a6", linewidth=0.7,
+    ax.plot(ts_df.index, signal, color="#95a5a6", linewidth=0.9,
             alpha=0.7, zorder=2)
 
     # Shade regimes + mean +/- 1 sigma
@@ -463,7 +494,7 @@ def _plot_single_consensus(ax, res, palette, subtitle):
 
         ax.axvspan(t_s, t_e, color=c, alpha=0.07, zorder=0)
         ax.hlines(y=reg["mean"], xmin=t_s, xmax=t_e, color=c,
-                  linewidth=2.0, linestyle="-", zorder=3)
+                  linewidth=2.5, linestyle="-", zorder=3)
         seg_times = ts_df.index[idx_s:idx_e]
         ax.fill_between(seg_times,
                         reg["mean"] - reg["std"],
@@ -473,14 +504,14 @@ def _plot_single_consensus(ax, res, palette, subtitle):
     # Breakpoint vertical lines
     for j, bp in enumerate(consensus_bkps):
         ax.axvline(ts_df.index[bp], color="black", linestyle="--",
-                   linewidth=1.6, zorder=4)
+                   linewidth=2.0, zorder=4)
 
     # Legend handles
-    handles = [Line2D([0], [0], color="#95a5a6", linewidth=0.7,
-                      label=r"$K_d490$ signal")]
+    handles = [Line2D([0], [0], color="#95a5a6", linewidth=0.9,
+                      label=r"$K_d$490 signal")]
     for i, reg in enumerate(regimes):
         c = palette[i % len(palette)]
-        handles.append(Line2D([0], [0], color=c, linewidth=2.0,
+        handles.append(Line2D([0], [0], color=c, linewidth=2.5,
                               label=(f"Regime {reg['regime']}: "
                                      f"$\\mu$={reg['mean']:.2f}, "
                                      f"$\\sigma$={reg['std']:.2f}")))
@@ -489,7 +520,7 @@ def _plot_single_consensus(ax, res, palette, subtitle):
         p_val = bootstrap_results[j][0] if j < len(bootstrap_results) else np.nan
         sig = "***" if p_val < 0.001 else "**" if p_val < 0.01 else \
               "*" if p_val < 0.05 else "n.s."
-        handles.append(Line2D([0], [0], color="black", linewidth=1.6,
+        handles.append(Line2D([0], [0], color="black", linewidth=2.0,
                               linestyle="--",
                               label=(f"Break: {bp_date.strftime('%b %Y')} "
                                      f"($p$={p_val:.4f}{sig})")))
@@ -498,31 +529,33 @@ def _plot_single_consensus(ax, res, palette, subtitle):
                               label="No consensus break detected"))
 
     ax.legend(handles=handles, loc="upper center",
-              bbox_to_anchor=(0.5, -0.22), ncol=2, frameon=True,
-              fontsize=8.5, facecolor="white", edgecolor="#cccccc",
-              borderpad=0.6, columnspacing=1.2, handlelength=2.2)
+              bbox_to_anchor=(0.5, -0.18), ncol=2, frameon=True,
+              fontsize=10, facecolor="white", edgecolor="#cccccc",
+              borderpad=0.8, columnspacing=1.5, handlelength=2.5)
 
-    ax.set_ylabel(r"$K_d490$ ($\times 10^{-2}\ \mathrm{m^{-1}}$)",
-                  fontsize=10)
-    ax.set_xlabel("Year", fontsize=10)
+    ax.set_ylabel(r"$\mathbf{K_d490}$ ($\times 10^{-2}\ \mathrm{m^{-1}}$)",
+                  fontsize=13, fontweight="bold")
+    ax.set_xlabel("Year", fontsize=13, fontweight="bold")
     ax.xaxis.set_major_locator(mdates.YearLocator(3))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.tick_params(labelsize=9)
-    ax.text(-0.07, 1.04, subtitle, transform=ax.transAxes,
-            fontsize=13, fontweight="bold", va="bottom")
+    ax.tick_params(labelsize=11, width=0.8, length=5)
+    ax.text(-0.07, 1.05, subtitle, transform=ax.transAxes,
+            fontsize=15, fontweight="bold", va="bottom")
 
 
 def plot_consensus_2x1(res_control, res_impact):
     """Figure 2: 2x1 — (a) control zone, (b) impact zone."""
-    fig, axes = plt.subplots(2, 1, figsize=(12, 10), dpi=DPI)
+    fig, axes = plt.subplots(2, 1, figsize=(14, 12), dpi=DPI)
 
     palette_ctrl = ["#3498db", "#e67e22", "#2ecc71", "#9b59b6", "#1abc9c"]
     palette_imp = ["#2980b9", "#c0392b", "#27ae60", "#8e44ad", "#f39c12"]
 
-    _plot_single_consensus(axes[0], res_control, palette_ctrl, "(a)")
-    _plot_single_consensus(axes[1], res_impact, palette_imp, "(b)")
+    _plot_single_consensus(axes[0], res_control, palette_ctrl,
+                           r"$\mathbf{(a)}$")
+    _plot_single_consensus(axes[1], res_impact, palette_imp,
+                           r"$\mathbf{(b)}$")
 
     plt.tight_layout()
     plt.subplots_adjust(hspace=0.50)

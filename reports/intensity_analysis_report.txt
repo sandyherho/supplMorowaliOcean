@@ -5,7 +5,7 @@
   Extensions: chi-square, Wilson CI, Q-E-S, Cohen's h, Markov G-test
 ==============================================================================
   Author      : Sandy H. S. Herho
-  Generated   : 2026-03-01 21:14:21
+  Generated   : 2026-03-02 18:25:04
   LULC Source : Sentinel-2 10 m (Dynamic World / ESA WorldCover)
   Domain      : Lon [122.08, 122.28], Lat [-2.92, -2.72]
   Years       : 2017 to 2024 (8 snapshots)

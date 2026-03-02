@@ -20,6 +20,8 @@
     all 40 placebo results individually listed, full residual
     statistics, optical decomposition framework, and structured
     hypothesis evaluation with evidence table.
+  * FIGURE STYLE: Publication-quality (enlarged fonts, bold
+    labels, larger figure, high-visibility legend).
 =================================================================
 """
 
@@ -45,10 +47,16 @@ DATADIR      = "../processed_data"
 FIGDIR       = "../figs"
 REPORTDIR    = "../reports"
 
-matplotlib.rc("font", family="serif", size=9)
-matplotlib.rc("axes", linewidth=0.5)
-matplotlib.rc("xtick", direction="in", top=True)
-matplotlib.rc("ytick", direction="in", right=True)
+# ── Publication-quality plot style ────────────────────────────────
+matplotlib.rc("font", family="serif", size=12)
+matplotlib.rc("axes", linewidth=0.8, labelweight="bold", labelsize=13)
+matplotlib.rc("xtick", direction="in", top=True, labelsize=11)
+matplotlib.rc("ytick", direction="in", right=True, labelsize=11)
+matplotlib.rc("xtick.major", width=0.8, size=5)
+matplotlib.rc("ytick.major", width=0.8, size=5)
+matplotlib.rc("xtick.minor", width=0.5, size=3)
+matplotlib.rc("ytick.minor", width=0.5, size=3)
+matplotlib.rc("legend", fontsize=10, framealpha=0.95)
 
 UNIT = r"[$\times\,10^{-2}$ m$^{-1}$]"
 
@@ -156,17 +164,17 @@ def fit_bsts_quick(df, pre_end, post_start, post_end):
 
 # ═════════════════════════════════════════════════════════════════
 #  3. FIGURE
-#     Panel labels (a)(b)(c) centered ABOVE each subplot,
-#     outside axes area.  Six-item legend with full descriptions.
+#     Publication-quality: enlarged figure, bold labels,
+#     high-visibility legend, larger fonts throughout.
 # ═════════════════════════════════════════════════════════════════
 
 def plot_main(result, figdir):
     fig, axes = plt.subplots(
-        3, 1, figsize=(7.5, 9.0), sharex=True,
+        3, 1, figsize=(10, 12), sharex=True,
         gridspec_kw={"height_ratios": [3, 2, 2]})
     fig.subplots_adjust(
-        hspace=0.32, left=0.13, right=0.97,
-        top=0.96, bottom=0.14)
+        hspace=0.30, left=0.12, right=0.97,
+        top=0.96, bottom=0.12)
     intv = pd.Timestamp(INTERVENTION)
 
     # Trim Kalman burn-in (13 months)
@@ -179,59 +187,65 @@ def plot_main(result, figdir):
 
     # ── (a) Observed vs counterfactual ──────────────────────────
     ax = axes[0]
-    h_obs, = ax.plot(act, color="black", lw=1.2,
+    h_obs, = ax.plot(act, color="black", lw=1.5,
                      label=r"Observed $K_d$(490) — impact zone")
-    h_cf,  = ax.plot(pred, color="#1f77b4", lw=1.2, ls="-",
+    h_cf,  = ax.plot(pred, color="#1f77b4", lw=1.5, ls="-",
                      label="BSTS counterfactual")
     h_ci   = ax.fill_between(plo.index, plo, phi,
                               color="#1f77b4", alpha=0.20,
                               label="95% credible interval")
-    ax.axvline(intv, color="#d62728", ls="--", lw=1.3,
+    ax.axvline(intv, color="#d62728", ls="--", lw=1.6,
                label="Intervention (May 2019)")
-    ax.set_ylabel(r"$K_d$(490)  " + UNIT, fontsize=9)
-    ax.yaxis.set_label_coords(-0.09, 0.5)
-    ax.text(0.5, 1.04, "(a)", transform=ax.transAxes,
-            fontsize=12, fontweight="bold", ha="center", va="bottom")
+    ax.set_ylabel(r"$\mathbf{K_d}$(490)  " + UNIT, fontsize=13,
+                  fontweight="bold")
+    ax.yaxis.set_label_coords(-0.08, 0.5)
+    ax.tick_params(axis="both", which="major", labelsize=11)
+    ax.text(0.5, 1.05, r"$\mathbf{(a)}$", transform=ax.transAxes,
+            fontsize=14, fontweight="bold", ha="center", va="bottom")
 
     # ── (b) Pointwise effect ─────────────────────────────────────
     ax = axes[1]
     ax.fill_between(pe.index, plo - pred, phi - pred,
                     color="#1f77b4", alpha=0.20)
-    ax.plot(pe, color="black", lw=0.9)
+    ax.plot(pe, color="black", lw=1.2)
     ax.axhline(0, color="#555555", ls=":", lw=0.8)
-    ax.axvline(intv, color="#d62728", ls="--", lw=1.3)
-    ax.set_ylabel("Pointwise effect\n" + UNIT, fontsize=9)
-    ax.yaxis.set_label_coords(-0.09, 0.5)
-    ax.text(0.5, 1.04, "(b)", transform=ax.transAxes,
-            fontsize=12, fontweight="bold", ha="center", va="bottom")
+    ax.axvline(intv, color="#d62728", ls="--", lw=1.6)
+    ax.set_ylabel("Pointwise effect\n" + UNIT, fontsize=13,
+                  fontweight="bold")
+    ax.yaxis.set_label_coords(-0.08, 0.5)
+    ax.tick_params(axis="both", which="major", labelsize=11)
+    ax.text(0.5, 1.05, r"$\mathbf{(b)}$", transform=ax.transAxes,
+            fontsize=14, fontweight="bold", ha="center", va="bottom")
 
     # ── (c) Cumulative effect ────────────────────────────────────
     ax = axes[2]
     ce = result["cumul_effect"]
-    ax.plot(ce, color="black", lw=1.0)
+    ax.plot(ce, color="black", lw=1.3)
     ax.fill_between(ce.index, 0, ce, where=ce > 0,
                     color="#d62728", alpha=0.22, interpolate=True)
     ax.fill_between(ce.index, 0, ce, where=ce < 0,
                     color="#1f77b4", alpha=0.22, interpolate=True)
     ax.axhline(0, color="#555555", ls=":", lw=0.8)
-    ax.axvline(intv, color="#d62728", ls="--", lw=1.3)
-    ax.set_ylabel("Cumulative effect\n" + UNIT, fontsize=9)
-    ax.set_xlabel("Year", fontsize=9)
-    ax.yaxis.set_label_coords(-0.09, 0.5)
+    ax.axvline(intv, color="#d62728", ls="--", lw=1.6)
+    ax.set_ylabel("Cumulative effect\n" + UNIT, fontsize=13,
+                  fontweight="bold")
+    ax.set_xlabel("Year", fontsize=13, fontweight="bold")
+    ax.yaxis.set_label_coords(-0.08, 0.5)
     ax.xaxis.set_major_locator(mdates.YearLocator(2))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-    ax.text(0.5, 1.04, "(c)", transform=ax.transAxes,
-            fontsize=12, fontweight="bold", ha="center", va="bottom")
+    ax.tick_params(axis="both", which="major", labelsize=11)
+    ax.text(0.5, 1.05, r"$\mathbf{(c)}$", transform=ax.transAxes,
+            fontsize=14, fontweight="bold", ha="center", va="bottom")
 
     # ── Unified legend ───────────────────────────────────────────
     leg_handles = [
-        mlines.Line2D([], [], color="black", lw=1.2,
+        mlines.Line2D([], [], color="black", lw=1.5,
                       label=r"Observed $K_d$(490) — impact zone"),
-        mlines.Line2D([], [], color="#1f77b4", lw=1.2,
+        mlines.Line2D([], [], color="#1f77b4", lw=1.5,
                       label="BSTS counterfactual (control-zone covariates)"),
         mpatches.Patch(facecolor="#1f77b4", alpha=0.35,
                        edgecolor="none", label="95% credible interval"),
-        mlines.Line2D([], [], color="#d62728", lw=1.3, ls="--",
+        mlines.Line2D([], [], color="#d62728", lw=1.6, ls="--",
                       label="Intervention — May 2019"),
         mpatches.Patch(facecolor="#d62728", alpha=0.35,
                        edgecolor="none", label="Positive cumulative effect"),
@@ -239,10 +253,10 @@ def plot_main(result, figdir):
                        edgecolor="none", label="Negative cumulative effect"),
     ]
     fig.legend(handles=leg_handles, loc="lower center", ncol=2,
-               fontsize=8, frameon=True, framealpha=0.95,
-               edgecolor="#aaaaaa", borderpad=0.7,
-               handlelength=2.0, handleheight=0.9,
-               columnspacing=1.2, bbox_to_anchor=(0.5, 0.0))
+               fontsize=10, frameon=True, framealpha=0.95,
+               edgecolor="#aaaaaa", borderpad=0.8,
+               handlelength=2.2, handleheight=1.0,
+               columnspacing=1.5, bbox_to_anchor=(0.5, -0.005))
 
     for fmt in ("pdf", "png"):
         fig.savefig(os.path.join(figdir, f"bsts_causalimpact.{fmt}"),
@@ -361,12 +375,11 @@ def write_report(result, rank_p, placebo_effects, placebo_dates,
     w("  SECTION 2 — CAUSAL EFFECT ESTIMATES")
     w(SEP2)
 
-    # Pre-compute all derived quantities up front
     ci_width   = result['post_avg_upper'] - result['post_avg_lower']
     se_val     = ci_width / (2.0 * 1.96)
     z_val      = (abs(result['post_avg_eff']) / se_val
                   if se_val > 0 else np.nan)
-    pred_phys  = result["post_avg_pred"]    * 1e-2   # m^-1
+    pred_phys  = result["post_avg_pred"]    * 1e-2
     obs_phys   = result["post_avg_actual"]  * 1e-2
     eff_phys   = result["post_avg_eff"]     * 1e-2
     zeu_pred   = 4.6 / pred_phys
@@ -480,7 +493,7 @@ def write_report(result, rank_p, placebo_effects, placebo_dates,
     peff = result["post_period_effect"]
 
     cum      = 0.0
-    yr_store = {}   # {year: {obs:[], prd:[], eff:[]}}
+    yr_store = {}
 
     for dt in pa.index:
         obs = pa.loc[dt];  prd = pp_.loc[dt]
@@ -762,7 +775,6 @@ def write_report(result, rank_p, placebo_effects, placebo_dates,
     w("  SECTION 5 — ROBUSTNESS CHECKS")
     w(SEP2)
 
-    # ── 5a Placebo ───────────────────────────────────────────────
     w("\n  5a  Placebo / Falsification Test")
     w(DOT)
     block("Methodology: 40 pseudo-intervention dates are drawn "
@@ -817,7 +829,6 @@ def write_report(result, rank_p, placebo_effects, placebo_dates,
         w(f"  {i:>3}  {d.strftime('%Y-%m'):<9} {e:>+15.6f}  "
           f"{abs(e):>13.6f}  {flag:>10}")
 
-    # ── 5b Leave-one-out ─────────────────────────────────────────
     w("\n  5b  Leave-One-Out Covariate Sensitivity")
     w(DOT)
     block("The BSTS model is re-estimated four times: once with all "
@@ -863,7 +874,6 @@ def write_report(result, rank_p, placebo_effects, placebo_dates,
     else:
         w("  Result: CAUTION — effect direction unstable.")
 
-    # ── 5c Diagnostics ───────────────────────────────────────────
     w("\n  5c  Pre-Period Residual Diagnostics")
     w(DOT)
     resid_vals = result["pre_resid"].dropna().values
