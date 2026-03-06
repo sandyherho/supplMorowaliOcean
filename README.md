@@ -17,7 +17,7 @@
 
 ## Authors
 
-- **Sandy H. S. Herho* — Department of Earth and Planetary Sciences, University of California, Riverside, CA, USA; School of Systems Science and Industrial Engineering, State University of New York, Binghamton, NY, USA; Center for Agrarian Studies, Bandung Institute of Technology, Indonesia
+- **Sandy H. S. Herho** — Department of Earth and Planetary Sciences, University of California, Riverside, CA, USA; School of Systems Science and Industrial Engineering, State University of New York, Binghamton, NY, USA; Center for Agrarian Studies, Bandung Institute of Technology, Indonesia
 - **Alfita P. Handayani** — Center for Agrarian Studies; Spatial Systems and Cadaster Research Group, Bandung Institute of Technology, Indonesia
 - **Iwan P. Anwar** — Applied and Environmental Oceanography Research Group, Bandung Institute of Technology, Indonesia
 - **Faruq Khadami** — Applied and Environmental Oceanography Research Group, Bandung Institute of Technology, Indonesia
