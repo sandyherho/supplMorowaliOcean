@@ -1,6 +1,6 @@
 # Supplementary Material for "Causal Attribution of Coastal Water Clarity Degradation to Nickel Processing Expansion at the Indonesia Morowali Industrial Park, Sulawesi"
 
-[![DOI](https://zenodo.org/badge/1165944605.svg)](https://doi.org/10.5281/zenodo.18893793
+[![DOI](https://zenodo.org/badge/1165944605.svg)](https://doi.org/10.5281/zenodo.18893793)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![NumPy](https://img.shields.io/badge/NumPy-1.24%2B-013243.svg?logo=numpy&logoColor=white)](https://numpy.org/)
