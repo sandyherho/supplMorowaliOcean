@@ -1,5 +1,6 @@
 # Supplementary Material for "Causal Attribution of Coastal Water Clarity Degradation to Nickel Processing Expansion at the Indonesia Morowali Industrial Park, Sulawesi"
 
+[![arXiv](https://img.shields.io/badge/arXiv-2603.07331-B31B1B.svg?logo=arxiv&logoColor=red)](https://arxiv.org/abs/2603.07331)
 [![DOI](https://zenodo.org/badge/1165944605.svg)](https://doi.org/10.5281/zenodo.18893793)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
@@ -12,7 +13,7 @@
 [![ruptures](https://img.shields.io/badge/ruptures-1.1%2B-FF6F00.svg)](https://centre-borelli.github.io/ruptures-docs/)
 [![netCDF4](https://img.shields.io/badge/netCDF4-1.6%2B-1E88E5.svg)](https://unidata.github.io/netcdf4-python/)
 [![PyGMT](https://img.shields.io/badge/PyGMT-0.10%2B-44AA99.svg)](https://www.pygmt.org/)
-[![GlobColour](https://img.shields.io/badge/Data-GlobColour%20L3-0B3D91.svg)](https://hermes.acri.fr/)
+[![GlobColour](https://img.shields.io/badge/Data-GlobColour%20L4-0B3D91.svg)](https://hermes.acri.fr/)
 [![Sentinel-2](https://img.shields.io/badge/Data-Sentinel--2%2010m-003399.svg)](https://sentinel.esa.int/web/sentinel/missions/sentinel-2)
 [![GLORYS12v1](https://img.shields.io/badge/Data-GLORYS12v1-009FE3.svg)](https://marine.copernicus.eu/)
 
