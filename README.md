@@ -131,14 +131,18 @@ Steps 4–7 can run independently using the provided `processed_data/` CSVs. Ste
 
 ```bibtex
 @article{herho2026causal,
-  title     = {{Causal Attribution of Coastal Water Clarity Degradation to
-               Nickel Processing Expansion at the Indonesia Morowali
-               Industrial Park}, Sulawesi}},
+  title     = {{Causal attribution of coastal water clarity degradation to
+               nickel processing expansion at the Indonesia Morowali
+               Industrial Park, Sulawesi}},
   author    = {Herho, Sandy H. S. and Handayani, Alfita P. and Anwar, Iwan P.
                and Khadami, Faruq and Sujatmiko, Karina A. and Wibisono,
                Doandy Y. and Suwarman, Rusmawan and Irawan, Dasapta E.},
-  journal   = {xxxx},
-  year      = {202x}
+  journal   = {Environmental Research Communications},
+  publisher = {IOP Publishing},
+  volume = {8},
+  number = {6},
+  pages = {065058},
+  year      = {2026}
 }
 ```
 
